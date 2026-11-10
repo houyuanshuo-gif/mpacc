@@ -226,6 +226,35 @@
   .ans-cell i{font-style:normal;color:var(--muted);font-size:10px;margin-right:2px}
   .ans-cell.none{color:#C9CDD2}
 
+
+  /* ===== 今日一课（专注会话） ===== */
+  #sess{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column;
+    max-width:560px;margin:0 auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+  #sess.on{display:flex}
+  #sess .bar-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  #sess .bar-top b{font-size:15px;color:var(--text)}
+  #sess .prog{height:4px;background:var(--surface-2);border-radius:99px;margin:9px 0 14px;overflow:hidden}
+  #sess .prog i{display:block;height:100%;background:var(--brand);width:0;transition:width .25s}
+  #sess .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  #sess .step-t{font-size:11px;color:var(--muted);margin-bottom:6px}
+  #sess .q{font-size:17px;line-height:1.6;font-weight:500;margin:6px 0 12px}
+  #sess .opt{display:block;width:100%;text-align:left;font-family:var(--font);font-size:15px;
+    padding:12px 13px;margin-bottom:8px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface);color:var(--text);line-height:1.55;cursor:pointer}
+  #sess .opt.right{background:var(--brand-2);border-color:var(--brand);color:var(--brand)}
+  #sess .opt.bad{background:var(--danger-2);border-color:#E4B4AF;color:var(--danger)}
+  #sess .fb{font-size:13.5px;line-height:1.7;margin:8px 0;padding:10px;border-radius:9px;background:var(--surface-2);white-space:pre-wrap}
+  #sess .card-x{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+  #sess .done{text-align:center;padding:22px 6px}
+  #sess .done .big{font-size:32px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums}
+  #sess .foot{margin-top:10px}
+  #sess textarea{width:100%;margin-bottom:8px}
+
+  html.dark{--bg:#111315;--surface:#1A1D20;--surface-2:#24282C;--line:#33383D;
+    --text:#E7E9EB;--muted:#9BA2A9;--brand:#43C08A;--brand-2:#123322;
+    --danger:#F27A70;--danger-2:#3A1C19;--warn:#E3B05E;--warn-2:#33290F;}
+  html.dark .gold-zh,html.dark .yy-zh,html.dark #howList ol{color:var(--muted) !important}
+  html.dark #p-solve table th,html.dark #p-solve table td{color:var(--text) !important}
 </style>
 </head>
 <body>
@@ -236,7 +265,7 @@
         <h1>MPAcc 2027 作战台</h1>
         <div class="sub">山西财经 125300 · 目标 220</div>
       </div>
-      <div class="cd"><b id="cdNum">--</b><span id="cdTxt">天</span></div>
+      <div class="cd"><button id="themeBtn" class="btn ghost sm" style="padding:3px 8px;font-size:11px;margin-bottom:5px">深色</button><b id="cdNum">--</b><span id="cdTxt">天</span></div>
     </div>
     <div class="stats">
       <div class="stat"><b id="s1">0%</b><span>今日完成</span></div>
@@ -250,6 +279,8 @@
     <section id="p-today" class="on">
       <div class="card">
         <h2>今日入口 <small>除整套真题外，都在程序里做</small></h2>
+        <button class="btn block" id="goSession" style="margin-bottom:9px">▶ 开始今日一课（专注模式）</button>
+        <button class="btn ghost block" id="goSpeak" style="margin-bottom:9px">🚶 路上 5 分钟 · 一词两用</button>
         <div class="fm-chips" style="margin-bottom:0">
           <button id="goFormula">今日公式</button>
           <button id="goDrill">专项练习</button>
@@ -259,6 +290,11 @@
         </div>
       </div>
 
+      <div class="card" id="installCard" style="display:none">
+        <h2>装到手机桌面 <small>装成才像 App</small></h2>
+        <div class="note" style="margin:0 0 9px">在<b>系统浏览器</b>（vivo 自带 / Chrome）打开本页，菜单 →「添加到桌面」。装好后从桌面图标进，全屏、断网也能开。</div>
+        <button class="btn block" id="installBtn">一键安装</button>
+      </div>
       <div class="card" id="schedCard">
         <h2>全天时间表 <small>6:30–23:00，练满但不断</small></h2>
         <div class="note" style="margin:0 0 8px">
@@ -575,7 +611,7 @@
         <div class="row" style="margin-top:7px">
           <button class="btn block" id="addWord">加入</button>
         </div>
-        <div class="note">间隔由难度和稳定度自动计算（借鉴 Anki 的 FSRS 思路）：答错难度 +1、稳定度 ×0.4，隔天必须再见；答对稳定度按难度放大。每天最多 40 张，超出的顺延，防堆积。</div>
+        <div class="note">间隔由难度和稳定度自动计算（借鉴 Anki 的 FSRS 思路）：答错难度 +1、稳定度 ×0.4，隔天必须再见；答对稳定度按难度放大。每天最多 50 张，超出的顺延，防堆积。</div>
       </div>
     </section>
 
@@ -731,6 +767,13 @@
     </div>
 
   </main>
+</div>
+
+<div id="sess">
+  <div class="bar-top"><b id="sesTitle">今日一课</b><span><span id="sesTimer">--:--</span> <button id="sesQuit" class="btn ghost sm" style="padding:4px 10px">退出</button></span></div>
+  <div class="prog"><i id="sesProg"></i></div>
+  <div class="body" id="sesBody"></div>
+  <div class="foot" id="sesFoot"></div>
 </div>
 
 <nav>
@@ -1009,7 +1052,7 @@
       tick=setInterval(function(){ sec++; paintTimer(); },1000);
     }else{
       running=false; clearInterval(tick);
-      if(sec>0){ var tm=tmap(today()); tm[timerSubj]=(tm[timerSubj]||0)+sec; save(); }
+      if(sec>0){ var tm=tmap(curDate); tm[timerSubj]=(tm[timerSubj]||0)+sec; save(); }
       sec=0; $("btnTimer").textContent="开始计时"; $("btnTimer").classList.remove("warn");
       paintTimer(); renderTime();
     }
@@ -1094,10 +1137,13 @@
 
   // ---------- 默写模式 ----------
   var mdList=[], mdIdx=0, mdRight=0, mdWrong=[], mdLock=false;
+  var _mdDictCache=null;
   function mdDict(){
+    if(_mdDictCache) return _mdDictCache;
     var el=document.getElementById("w1500"); if(!el) return {};
     var arr=[]; try{ arr=JSON.parse(el.textContent); }catch(e){ return {}; }
-    var d={}; arr.forEach(function(x){ d[String(x.w).toLowerCase()]=x.m; }); return d;
+    var d={}; arr.forEach(function(x){ d[String(x.w).toLowerCase()]=x.m; });
+    _mdDictCache=d; return d;
   }
   function mdZh(w){
     var t=String(w.s||"");
@@ -1993,7 +2039,7 @@
   }
 
   function todayFormulaJump() {
-    var inf = getDay(today());
+    var inf = getDay(curDate);
     if (!inf) return;
     var t = inf.m || "", m = t.match(/公式(\d+)章/);
     if (m) { fmJump(parseInt(m[1], 10)); return; }
@@ -2713,6 +2759,301 @@
       if(b.dataset.p==="solve"){ renderQ(); renderFM(); }
     });
   });
+
+  // ================= 今日一课（专注会话） =================
+  var SES = {on:false, ds:"", steps:[], i:0, qs:[], qi:0, gotStep:0, correctTotal:0, wrongQ:[], cards:[], ci:0, left:0, tick:null};
+
+  function sesEl(id){ return document.getElementById(id); }
+  function sesBody(){ return sesEl("sesBody"); }
+  function sesFoot(html){ var f=sesEl("sesFoot"); if(f) f.innerHTML=html||""; }
+
+  function sesBuild(ds){
+    var inf=getDay(ds); if(!inf) return [];
+    var m=inf.m||"", l=inf.l||"", steps=[];
+    if(m && m!=="—" && /公式/.test(m)) steps.push({k:"formula", title:"公式默写", min:10});
+    if(m && m!=="—"){
+      var c=Math.min(20, parseInt((m.match(/(\d+)\s*题/)||[])[1],10)||12);
+      steps.push({k:"drill", title:"数学专项", subj:"数学", count:c, min:Math.round(c*2.4)});
+      steps.push({k:"rest", title:"休息 2 分钟 · 口语", min:2});
+    }
+    if(l && l!=="—"){
+      var c2=Math.min(25, parseInt((l.match(/(\d+)\s*题/)||[])[1],10)||15);
+      steps.push({k:"drill", title:"逻辑专项", subj:"逻辑", count:c2, min:Math.round(c2*1.67)});
+      steps.push({k:"rest", title:"休息 2 分钟 · 口语", min:2});
+    }
+    steps.push({k:"recycle", title:"错题回炉", min:8});
+    steps.push({k:"review", title:"收尾复盘", min:2});
+    return steps;
+  }
+
+  function sesSetTimer(min){
+    clearInterval(SES.tick); SES.tick=null;
+    SES.left = Math.round((min||0)*60);
+    var t=sesEl("sesTimer");
+    if(t) t.textContent = SES.left>0 ? fmt(SES.left) : "--:--";
+    if(SES.left>0){
+      SES.tick=setInterval(function(){
+        SES.left--;
+        var e=sesEl("sesTimer");
+        if(e) e.textContent = SES.left>0 ? fmt(SES.left) : "时间到";
+        if(SES.left<=0){ clearInterval(SES.tick); SES.tick=null; }
+      },1000);
+    }
+  }
+
+  function sesOpen(){
+    var steps=sesBuild(curDate);
+    if(!steps.length){ alert("这一天没有计划任务。"); return; }
+    SES={on:true, ds:curDate, steps:steps, i:0, qs:[], qi:0, gotStep:0, correctTotal:0, wrongQ:[], cards:[], ci:0, left:0, tick:null};
+    sesEl("sess").classList.add("on");
+    sesRenderStep();
+  }
+  function sesClose(){
+    clearInterval(SES.tick); SES.tick=null; SES.on=false;
+    sesEl("sess").classList.remove("on");
+  }
+
+  function sesRenderStep(){
+    var st=SES.steps[SES.i];
+    if(!st){ sesFinish(); return; }
+    clearInterval(SES.tick); SES.tick=null;
+    sesEl("sesTitle").textContent = st.title;
+    sesEl("sesProg").style.width = Math.round(SES.i/SES.steps.length*100)+"%";
+    sesSetTimer(st.min);
+    if(st.k==="formula") sesFormula();
+    else if(st.k==="drill") sesDrill(st);
+    else if(st.k==="recycle") sesRecycle();
+    else if(st.k==="review") sesReview();
+    else if(st.k==="rest") sesRest();
+  }
+  function sesAdvance(){ SES.i++; sesRenderStep(); }
+
+  function sesFormula(){
+    var pool = FM.filter(function(x){ return x.s==="数学"; });
+    if(!pool.length) pool = FM.slice();
+    for(var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    SES.cards = pool.slice(0,8); SES.ci=0;
+    sesRenderCard();
+  }
+  function sesRenderCard(){
+    var x=SES.cards[SES.ci];
+    if(!x){ sesAdvance(); return; }
+    sesBody().innerHTML = '<div class="card-x"><div class="step-t">'+esc(x.ch||"")+' · '+(SES.ci+1)+'/'+SES.cards.length+'</div>'
+      +'<div class="q">'+esc(x.t||"")+'</div>'
+      +'<div class="note">合上书，先出声把公式/规则说出来，再看答案。</div>'
+      +'<div id="sesAns" class="fb" style="display:none;margin-top:10px">'+esc(x.b||"")+'</div></div>';
+    sesFoot('<button class="btn block" id="sesShow">显示答案</button>');
+    sesEl("sesShow").onclick=function(){
+      sesEl("sesAns").style.display="";
+      sesFoot('<div class="row"><button class="btn ghost" id="sesNo" style="flex:1">没记住</button><button class="btn" id="sesYes" style="flex:1">记住了</button></div>');
+      sesEl("sesNo").onclick=function(){ SES.wrongQ.push({t:"formula", x:x}); SES.ci++; sesRenderCard(); };
+      sesEl("sesYes").onclick=function(){ SES.ci++; sesRenderCard(); };
+    };
+  }
+
+  function sesDrill(st){
+    var pool = state.bank.filter(function(x){ return x.s===st.subj && x.opts && x.opts.length; });
+    for(var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    SES.qs = pool.slice(0, st.count||12); SES.qi=0; SES.gotStep=0;
+    if(!SES.qs.length){
+      sesBody().innerHTML='<div class="empty">题库里这个科目没有带选项的题。</div>';
+      sesFoot('<button class="btn block" id="sesSkip">跳过这一步</button>');
+      sesEl("sesSkip").onclick=sesAdvance; return;
+    }
+    sesRenderQ(false);
+  }
+
+  function sesRenderQ(isRecycle){
+    var x=SES.qs[SES.qi];
+    if(!x){ if(isRecycle) sesRecycleDone(); else sesDrillDone(); return; }
+    var html='<div class="step-t">'+(isRecycle?"回炉 · ":"")+'第 '+(SES.qi+1)+'/'+SES.qs.length+' 题 · '+esc((x.y||"")+" "+(x.s||"")+" 第"+(x.no||"?")+"题")+'</div>'
+      +'<div class="q">'+esc(x.stem||"")+'</div><div id="sesOpts">';
+    (x.opts||[]).forEach(function(o,k){ html+='<button class="opt" data-k="'+k+'">'+esc(o)+'</button>'; });
+    html+='</div><div id="sesFb"></div>';
+    sesBody().innerHTML=html;
+    sesFoot("");
+    sesEl("sesOpts").querySelectorAll("button").forEach(function(b){
+      b.onclick=function(){ sesPick(parseInt(b.dataset.k,10), isRecycle); };
+    });
+  }
+
+  function sesPick(k, isRecycle){
+    var x=SES.qs[SES.qi], key=ansKey(x), picked=optKey((x.opts||[])[k]||"");
+    var ok = !!(picked && picked===key);
+    sesEl("sesOpts").querySelectorAll("button").forEach(function(b){
+      b.disabled=true;
+      var c=optKey(b.textContent);
+      if(key && c===key) b.classList.add("right");
+      else if(parseInt(b.dataset.k,10)===k && !ok) b.classList.add("bad");
+    });
+    var ex = x.exp ? (expOk(x)? x.exp : "这题的解析与题干疑似错位，已隐藏，请对纸质解析核对。") : "这题还没有讲解。";
+    sesEl("sesFb").innerHTML='<div class="fb">'+(ok?"✅ 对":"❌ 错"+(key?"，答案 "+key:"（题库没答案）"))+"\n"+esc(ex)+'</div>';
+    sesFoot('<button class="btn block" id="sesNext">'+(SES.qi+1<SES.qs.length?"下一题":"继续")+'</button>');
+    sesEl("sesNext").onclick=function(){ SES.qi++; sesRenderQ(isRecycle); };
+    if(ok){ SES.gotStep++; SES.correctTotal++; }
+    else{
+      var dup = SES.wrongQ.some(function(w){ return w.x && w.x.y===x.y && w.x.s===x.s && w.x.no===x.no; });
+      if(!dup) SES.wrongQ.push({t:"q", x:x});
+      var label=(x.y||"")+" "+(x.s||"")+" 第"+(x.no||"?")+"题";
+      if(!state.wrong.some(function(w){ return w.q===label; })){
+        state.wrong.unshift({id:"s"+Date.now()+Math.random().toString(36).slice(2,6), subj:x.s||"", q:label,
+          reason:"今日一课答错", date:today(), next:addDays(today(),1), pass:0, done:false});
+        save();
+      }
+    }
+  }
+
+  function sesDrillDone(){
+    var n=SES.qs.length;
+    sesBody().innerHTML='<div class="done"><div class="big">'+SES.gotStep+'/'+n+'</div><div class="note">这一步完成，错题已进回炉队列和错题本。</div></div>';
+    sesFoot('<button class="btn block" id="sesGo2">继续</button>');
+    sesEl("sesGo2").onclick=sesAdvance;
+  }
+
+  function sesRecycle(){
+    var qs = SES.wrongQ.filter(function(w){ return w.t==="q"; }).map(function(w){ return w.x; });
+    var seen={}, uniq=[];
+    qs.forEach(function(x){ var k=(x.y||"")+"|"+(x.s||"")+"|"+(x.no||""); if(!seen[k]){ seen[k]=1; uniq.push(x); } });
+    if(!uniq.length){
+      sesBody().innerHTML='<div class="empty">这一步没有需要回炉的题，直接通过。</div>';
+      sesFoot('<button class="btn block" id="sesSkip2">继续</button>');
+      sesEl("sesSkip2").onclick=sesAdvance; return;
+    }
+    SES.qs=uniq; SES.qi=0; sesRenderQ(true);
+  }
+  function sesRecycleDone(){
+    sesBody().innerHTML='<div class="done"><div class="note">回炉完成，错题已记下，明天还会再考。</div></div>';
+    sesFoot('<button class="btn block" id="sesGo3">继续</button>');
+    sesEl("sesGo3").onclick=sesAdvance;
+  }
+
+  function sesReview(){
+    sesBody().innerHTML='<div class="card-x"><div class="step-t">收尾复盘</div>'
+      +'<div class="note" style="margin:0 0 8px">三句话，写完今天就收工。</div>'
+      +'<textarea id="sr1" rows="2" placeholder="今天最冤的一题是？"></textarea>'
+      +'<textarea id="sr2" rows="2" placeholder="错因：知识缺 / 会但慢 / 看错 / 蒙对？"></textarea>'
+      +'<textarea id="sr3" rows="2" placeholder="明天第一件先补什么？"></textarea></div>';
+    sesFoot('<button class="btn block" id="sesEnd">结束今日一课</button>');
+    sesEl("sesEnd").onclick=function(){
+      var s=[sesEl("sr1").value,sesEl("sr2").value,sesEl("sr3").value].filter(Boolean).join(" | ");
+      if(s) state.notes[curDate]=(state.notes[curDate]?state.notes[curDate]+"\n":"")+s;
+      save(); sesFinish();
+    };
+  }
+
+  function sesFinish(){
+    clearInterval(SES.tick); SES.tick=null;
+    sesEl("sesProg").style.width="100%";
+    var wq=SES.wrongQ.filter(function(w){ return w.t==="q"; }).length;
+    sesBody().innerHTML='<div class="done"><div class="big">'+SES.correctTotal+'</div>'
+      +'<div class="note">今日一课完成 · 答对 '+SES.correctTotal+' 题 · 回炉 '+wq+' 道 · 没记住 '+(SES.wrongQ.length-wq)+' 个</div>'
+      +'<div class="note">明天同一时间，继续。</div></div>';
+    sesFoot('<button class="btn block" id="sesClose2">退出</button>');
+    sesEl("sesClose2").onclick=sesClose;
+    head();
+  }
+
+  if(sesEl("goSession")) sesEl("goSession").onclick=sesOpen;
+  if(sesEl("sesQuit")) sesEl("sesQuit").onclick=function(){ if(typeof SPK!=="undefined" && SPK.on) spkClose(); else sesClose(); };
+
+  // 安装引导
+  var _installEvt=null;
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault(); _installEvt=e;
+    var c=sesEl("installCard"); if(c) c.style.display="block";
+  });
+  (function(){
+    var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+    if(!standalone){ var c=sesEl("installCard"); if(c) c.style.display="block"; }
+    var b=sesEl("installBtn");
+    if(b) b.onclick=function(){
+      if(_installEvt){ _installEvt.prompt(); _installEvt=null; }
+      else { alert("请用系统浏览器打开本页，菜单里选「添加到桌面 / 安装应用」。如果在飞书里，先点右上角「在浏览器中打开」。"); }
+    };
+  })();
+
+  // 深色/浅色手动开关（跟系统解耦）
+  (function(){
+    var TK="mpacc.theme";
+    function apply(t){
+      document.documentElement.classList.toggle("dark", t==="dark");
+      var b=sesEl("themeBtn"); if(b) b.textContent = t==="dark" ? "浅色" : "深色";
+    }
+    var saved=null; try{ saved=localStorage.getItem(TK); }catch(e){}
+    var sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    apply(saved || (sysDark ? "dark" : "light"));
+    var b=sesEl("themeBtn");
+    if(b) b.onclick=function(){
+      var next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+      apply(next);
+      try{ localStorage.setItem(TK,next); }catch(e){}
+    };
+  })();
+
+  // ================= 一词两用 · 路上 5 分钟 / 休息口语 =================
+  var SPEAK=[
+   {w:"account for", m:"占（比例）；解释", write:"The proportion of graduates choosing further study accounts for nearly 40% of the total.", say:"So how do you account for the rise in online learning?", tip:"作文写图表占比；口语问原因。"},
+   {w:"contribute to", m:"导致；有助于", write:"Several factors contribute to this phenomenon, among which the widespread use of the Internet is the most obvious.", say:"What do you think contributes to people's stress at work?", tip:"作文写原因段开头；口语问原因。"},
+   {w:"attach importance to", m:"重视", write:"It is widely acknowledged that young people attach greater importance to the quality of life than to salary alone.", say:"I really attach importance to getting enough sleep.", tip:"作文万能句；口语表达态度。"},
+   {w:"play a vital role in", m:"在…中起关键作用", write:"Education plays a vital role in shaping one's values and broadening one's horizons.", say:"Reading plays a vital role in my daily life.", tip:"作文论点句；口语说影响。"},
+   {w:"give rise to", m:"引起；导致", write:"The rapid development of technology has given rise to a series of social problems.", say:"Long working hours can give rise to health problems.", tip:"比 cause 高级，作文提分。"},
+   {w:"be attributed to", m:"归因于", write:"The decline in sales can be attributed to the fierce competition and the change in consumer habits.", say:"His success can be attributed to hard work rather than luck.", tip:"作文分析原因；口语评价。"},
+   {w:"in terms of", m:"在…方面", write:"In terms of academic performance, students who read widely tend to do better.", say:"In terms of price, this one is much better.", tip:"作文对比；口语比较。"},
+   {w:"tend to", m:"倾向于", write:"People who exercise regularly tend to be more energetic and less stressed.", say:"I tend to stay up late when I'm anxious.", tip:"作文描述趋势；口语说习惯。"},
+   {w:"be likely to", m:"很可能", write:"Those who lack sleep are more likely to make mistakes at work.", say:"You're likely to feel better after a short walk.", tip:"作文预测；口语给建议。"},
+   {w:"cope with", m:"应对；处理", write:"Learning to cope with pressure is an essential skill for young people.", say:"How do you cope with stress before an exam?", tip:"作文建议；口语谈压力。"},
+   {w:"adapt to", m:"适应", write:"Freshmen often find it hard to adapt to the new environment.", say:"It took me a while to adapt to the new schedule.", tip:"作文举例子；口语讲经历。"},
+   {w:"benefit from", m:"从…受益", write:"Both individuals and society can benefit from lifelong learning.", say:"I benefit a lot from reading English every morning.", tip:"作文结论；口语讲收获。"},
+   {w:"take measures to", m:"采取措施", write:"It is high time that we took effective measures to protect the environment.", say:"The school should take measures to reduce students' pressure.", tip:"作文呼吁；口语提建议。"},
+   {w:"be aware of", m:"意识到", write:"More and more people are aware of the importance of mental health.", say:"I wasn't aware of how tired I was until I stopped.", tip:"作文现象句；口语反思。"},
+   {w:"make a difference", m:"起作用；带来改变", write:"Even a small habit can make a difference in the long run.", say:"A few minutes of practice every day can make a difference.", tip:"作文结尾；口语鼓励。"},
+   {w:"have access to", m:"能够获得", write:"With the Internet, students in remote areas have access to high-quality courses.", say:"Do you have access to a quiet place to study?", tip:"作文论述；口语提问。"}
+  ];
+  var SPK={on:false, i:0, left:0, tick:null};
+
+  function spkOpen(){
+    clearInterval(SES.tick); SES.tick=null; SES.on=false;
+    SPK.on=true; SPK.i=Math.floor(Math.random()*SPEAK.length);
+    sesEl("sess").classList.add("on");
+    sesEl("sesTitle").textContent="一词两用 · 路上 5 分钟";
+    sesEl("sesProg").style.width="0%";
+    clearInterval(SPK.tick); SPK.left=300;
+    sesEl("sesTimer").textContent=fmt(SPK.left);
+    SPK.tick=setInterval(function(){
+      SPK.left--;
+      var e=sesEl("sesTimer"); if(e) e.textContent = SPK.left>0?fmt(SPK.left):"时间到";
+      if(SPK.left<=0){ clearInterval(SPK.tick); SPK.tick=null; }
+    },1000);
+    spkRender();
+  }
+  function spkClose(){ clearInterval(SPK.tick); SPK.tick=null; SPK.on=false; sesEl("sess").classList.remove("on"); }
+  function spkRender(){
+    var x=SPEAK[SPK.i];
+    if(!x) return;
+    sesEl("sesProg").style.width=Math.round((SPK.i+1)/SPEAK.length*100)+"%";
+    sesEl("sesBody").innerHTML='<div class="card-x"><div class="step-t">'+(SPK.i+1)+'/'+SPEAK.length+' · 先大声说，再写</div>'
+      +'<div style="font-size:26px;font-weight:600;margin:6px 0 4px">'+esc(x.w)+'</div>'
+      +'<div class="note" style="margin:0 0 10px">阅读高频义：'+esc(x.m)+'</div>'
+      +'<div class="fb"><b>口语怎么说</b><br>'+esc(x.say)+'</div>'
+      +'<div class="fb"><b>作文怎么写</b><br>'+esc(x.write)+'</div>'
+      +'<div class="note">'+esc(x.tip||"")+'</div></div>';
+    sesFoot('<div class="row"><button class="btn ghost" id="spkSay" style="flex:1">读一遍</button><button class="btn" id="spkNext" style="flex:1">下一个</button></div>'
+      +'<div class="row" style="margin-top:7px"><button class="btn ghost block" id="spkQuit2">退出</button></div>');
+    sesEl("spkSay").onclick=function(){ sayWord(x.say); };
+    sesEl("spkNext").onclick=function(){ SPK.i=(SPK.i+1)%SPEAK.length; spkRender(); };
+    sesEl("spkQuit2").onclick=spkClose;
+  }
+  function sesRest(){
+    var x=SPEAK[Math.floor(Math.random()*SPEAK.length)];
+    sesBody().innerHTML='<div class="card-x"><div class="step-t">休息 · 一词两用</div>'
+      +'<div style="font-size:24px;font-weight:600;margin:6px 0">'+esc(x.w)+'</div>'
+      +'<div class="fb"><b>大声说 3 遍</b><br>'+esc(x.say)+'</div>'
+      +'<div class="note">说完点继续，脑子歇一下再进下一步。</div></div>';
+    sesFoot('<div class="row"><button class="btn ghost" id="restSay" style="flex:1">读一遍</button><button class="btn" id="restGo" style="flex:1">继续</button></div>');
+    sesEl("restSay").onclick=function(){ sayWord(x.say); };
+    sesEl("restGo").onclick=sesAdvance;
+  }
+  if(sesEl("goSpeak")) sesEl("goSpeak").onclick=spkOpen;
 
   function renderAll(){
     head(); renderToday(); renderTime(); renderWords(); renderWrong(); renderSolve(); renderData();
