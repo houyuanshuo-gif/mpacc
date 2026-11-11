@@ -249,6 +249,12 @@
   #sess .done .big{font-size:32px;font-weight:600;color:var(--brand);font-variant-numeric:tabular-nums}
   #sess .foot{margin-top:10px}
   #sess textarea{width:100%;margin-bottom:8px}
+  #sess .wrt-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+  #sess .wrt-chip{font-size:12px;padding:6px 9px;border-radius:99px;border:1px solid var(--line);
+    background:var(--surface);color:var(--brand);font-family:var(--font);cursor:pointer}
+  #sess .wrt-t{flex:1;font-size:12px;padding:7px 0;border-radius:8px;border:1px solid var(--line);
+    background:var(--surface);color:var(--muted);font-family:var(--font);cursor:pointer}
+  #sess .wrt-t.on{background:var(--brand-2);border-color:var(--brand);color:var(--brand);font-weight:600}
 
   html.dark{--bg:#111315;--surface:#1A1D20;--surface-2:#24282C;--line:#33383D;
     --text:#E7E9EB;--muted:#9BA2A9;--brand:#43C08A;--brand-2:#123322;
@@ -429,6 +435,7 @@
           <button class="btn ghost sm" id="writeTimer" style="flex:1">开始 30 分钟</button>
           <button class="btn ghost sm" id="writeStop" style="flex:1">停</button>
         </div>
+        <button class="btn block" id="goWrt" style="margin-bottom:9px">✍️ 作文训练（30 分钟 + 高频词）</button>
         <details class="kbgrp"><summary>论证有效性分析 · 6 类漏洞</summary><div class="fm-b">1 混淆/偷换概念：同一词前后含义不同。「材料把 A 等同于 B，二者并非同一概念。」
 2 以偏概全：由局部样例推全体。「仅凭一个案例就推及所有情况，样本不足。」
 3 不当类比：两对象本质不同却硬比。「A 与 B 在机制上不同，不能简单类比。」
@@ -2968,7 +2975,7 @@
   }
 
   if(sesEl("goSession")) sesEl("goSession").onclick=sesOpen;
-  if(sesEl("sesQuit")) sesEl("sesQuit").onclick=function(){ if(typeof SPK!=="undefined" && SPK.on) spkClose(); else sesClose(); };
+  if(sesEl("sesQuit")) sesEl("sesQuit").onclick=function(){ if(typeof WRT!=="undefined" && WRT.on) wrtClose(); else if(typeof SPK!=="undefined" && SPK.on) spkClose(); else sesClose(); };
 
   // 安装引导
   var _installEvt=null;
@@ -3099,6 +3106,87 @@
     sesEl("restSay").onclick=function(){ sayWord(x.say); };
     sesEl("restGo").onclick=sesAdvance;
   }
+  // ---------- 作文训练：模板 + 高频词 + 30 分钟 ----------
+  var WRT = {on:false, type:"arg", tick:null, left:1800, used:[]};
+  var TPL = {
+    arg: "开头两句话引述+质疑；中间 4 段，每段「漏洞+为什么错+反例」；结尾一句总结。",
+    essay: "引（用材料一句话点题）→ 议（是什么/为什么）→ 联（联系管理或社会现实，举一个具体例子）→ 结（回扣主题，给做法）。",
+    en1: "I am writing to (express my sincere thanks / apply for / inform you that) ... First and foremost, ... In addition, ... I would appreciate it if you could take my request into consideration.",
+    en2: "The chart illustrates ... As is shown, ... Several factors contribute to this phenomenon. To begin with, ... In addition, ... In conclusion, ..."
+  };
+
+  function wrtTimer(){
+    clearInterval(WRT.tick); WRT.tick=null;
+    var e=sesEl("sesTimer"); if(e) e.textContent = fmt(WRT.left);
+  }
+  function wrtOpen(){
+    clearInterval(SES.tick); SES.tick=null; SES.on=false;
+    if(typeof SPK!=="undefined" && SPK.on){ SPK.on=false; clearInterval(SPK.tick); SPK.tick=null; }
+    WRT.on=true; WRT.type="arg"; WRT.left=1800; WRT.used=[];
+    sesEl("sess").classList.add("on");
+    sesEl("sesTitle").textContent="作文训练 · 30 分钟";
+    sesEl("sesProg").style.width="0%";
+    wrtTimer();
+    wrtRender();
+  }
+  function wrtClose(){
+    clearInterval(WRT.tick); WRT.tick=null; WRT.on=false;
+    sesEl("sess").classList.remove("on");
+  }
+  function wrtRender(){
+    var chips = SPEAK.map(function(s,i){ return '<button class="wrt-chip" data-i="'+i+'">'+esc(s.w)+'</button>'; }).join("");
+    var tabs = [["arg","论证"],["essay","论说"],["en1","英语小"],["en2","英语大"]].map(function(t){
+      return '<button class="wrt-t'+(WRT.type===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>';
+    }).join("");
+    sesEl("sesBody").innerHTML = '<div class="card-x">'
+      +'<div class="row" style="margin-bottom:9px">'+tabs+'</div>'
+      +'<div class="fb" id="wrtTpl"><b>模板骨架</b><br>'+esc(TPL[WRT.type])+'</div>'
+      +'<div class="step-t" id="wrtUsed">高频词 · 点一下插入正文（已用 0 个）</div>'
+      +'<div class="wrt-chips">'+chips+'</div>'
+      +'<textarea id="wrtText" rows="10" placeholder="30 分钟，写完停笔。可以先点上面的词，再展开写。"></textarea>'
+      +'</div>';
+    sesFoot('<div class="row"><button class="btn ghost" id="wrtGo" style="flex:1">开始计时</button><button class="btn" id="wrtSave" style="flex:1">保存草稿</button></div>');
+    sesEl("sesBody").querySelectorAll(".wrt-t").forEach(function(b){
+      b.onclick=function(){
+        WRT.type=b.dataset.t;
+        sesEl("sesBody").querySelectorAll(".wrt-t").forEach(function(x){ x.classList.toggle("on", x.dataset.t===WRT.type); });
+        var box=sesEl("wrtTpl"); if(box) box.innerHTML='<b>模板骨架</b><br>'+esc(TPL[WRT.type]);
+      };
+    });
+    sesEl("sesBody").querySelectorAll(".wrt-chip").forEach(function(b){
+      b.onclick=function(){ wrtInsert(SPEAK[parseInt(b.dataset.i,10)].w); };
+    });
+    sesEl("wrtGo").onclick=function(){
+      WRT.left=1800; wrtTimer();
+      clearInterval(WRT.tick);
+      WRT.tick=setInterval(function(){
+        WRT.left--;
+        var e=sesEl("sesTimer"); if(e) e.textContent = WRT.left>0?fmt(WRT.left):"时间到";
+        if(WRT.left<=0){ clearInterval(WRT.tick); WRT.tick=null; }
+      },1000);
+    };
+    sesEl("wrtSave").onclick=wrtSave;
+  }
+  function wrtInsert(word){
+    var ta=sesEl("wrtText"); if(!ta) return;
+    var s=(typeof ta.selectionStart==="number")?ta.selectionStart:ta.value.length;
+    ta.value = ta.value.slice(0,s) + word + " " + ta.value.slice(s);
+    ta.focus();
+    if(WRT.used.indexOf(word)<0) WRT.used.push(word);
+    var st=sesEl("wrtUsed"); if(st) st.textContent = "高频词 · 点一下插入正文（已用 "+WRT.used.length+" 个）";
+  }
+  function wrtSave(){
+    var ta=sesEl("wrtText"); var text=ta?ta.value.trim():"";
+    if(!state.wrt) state.wrt=[];
+    state.wrt.unshift({date: today(), type: WRT.type, text: text, words: WRT.used.slice()});
+    save();
+    sesEl("sesBody").innerHTML='<div class="done"><div class="note">草稿已保存 · 用了 '+WRT.used.length+' 个高频词<br>'
+      +esc(text.slice(0,60))+(text.length>60?'…':'')+'</div></div>';
+    sesFoot('<button class="btn block" id="wrtQuit3">完成了</button>');
+    sesEl("wrtQuit3").onclick=wrtClose;
+  }
+  if(sesEl("goWrt")) sesEl("goWrt").onclick=wrtOpen;
+
   if(sesEl("goSpeak")) sesEl("goSpeak").onclick=spkOpen;
 
   function renderAll(){
