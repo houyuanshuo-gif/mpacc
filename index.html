@@ -435,7 +435,10 @@
           <button class="btn ghost sm" id="writeTimer" style="flex:1">开始 30 分钟</button>
           <button class="btn ghost sm" id="writeStop" style="flex:1">停</button>
         </div>
-        <button class="btn block" id="goWrt" style="margin-bottom:9px">✍️ 作文训练（30 分钟 + 高频词）</button>
+        <div class="row" style="margin-bottom:9px">
+          <button class="btn" id="goWrtZh" style="flex:1">✍️ 管综写作训练</button>
+          <button class="btn ghost" id="goWrtEn" style="flex:1">✍️ 英语作文训练</button>
+        </div>
         <details class="kbgrp"><summary>论证有效性分析 · 6 类漏洞</summary><div class="fm-b">1 混淆/偷换概念：同一词前后含义不同。「材料把 A 等同于 B，二者并非同一概念。」
 2 以偏概全：由局部样例推全体。「仅凭一个案例就推及所有情况，样本不足。」
 3 不当类比：两对象本质不同却硬比。「A 与 B 在机制上不同，不能简单类比。」
@@ -3107,7 +3110,7 @@
     sesEl("restGo").onclick=sesAdvance;
   }
   // ---------- 作文训练：模板 + 高频词 + 30 分钟 ----------
-  var WRT = {on:false, type:"arg", tick:null, left:1800, used:[]};
+  var WRT = {on:false, mode:"zh", type:"arg", tick:null, left:1800, used:[]};
   var TPL = {
     arg: "开头两句话引述+质疑；中间 4 段，每段「漏洞+为什么错+反例」；结尾一句总结。",
     essay: "引（用材料一句话点题）→ 议（是什么/为什么）→ 联（联系管理或社会现实，举一个具体例子）→ 结（回扣主题，给做法）。",
@@ -3119,12 +3122,13 @@
     clearInterval(WRT.tick); WRT.tick=null;
     var e=sesEl("sesTimer"); if(e) e.textContent = fmt(WRT.left);
   }
-  function wrtOpen(){
+  function wrtOpen(mode){
     clearInterval(SES.tick); SES.tick=null; SES.on=false;
     if(typeof SPK!=="undefined" && SPK.on){ SPK.on=false; clearInterval(SPK.tick); SPK.tick=null; }
-    WRT.on=true; WRT.type="arg"; WRT.left=1800; WRT.used=[];
+    WRT.on=true; WRT.mode=(mode==="en"?"en":"zh"); WRT.type=(WRT.mode==="en"?"en1":"arg");
+    WRT.left=1800; WRT.used=[];
     sesEl("sess").classList.add("on");
-    sesEl("sesTitle").textContent="作文训练 · 30 分钟";
+    sesEl("sesTitle").textContent=(WRT.mode==="en"?"英语作文训练":"管综写作训练")+" · 30 分钟";
     sesEl("sesProg").style.width="0%";
     wrtTimer();
     wrtRender();
@@ -3135,7 +3139,8 @@
   }
   function wrtRender(){
     var chips = SPEAK.map(function(s,i){ return '<button class="wrt-chip" data-i="'+i+'">'+esc(s.w)+'</button>'; }).join("");
-    var tabs = [["arg","论证"],["essay","论说"],["en1","英语小"],["en2","英语大"]].map(function(t){
+    var TABS = { zh:[["arg","论证有效性分析"],["essay","论说文"]], en:[["en1","英语小作文"],["en2","英语大作文"]] };
+    var tabs = TABS[WRT.mode].map(function(t){
       return '<button class="wrt-t'+(WRT.type===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>';
     }).join("");
     sesEl("sesBody").innerHTML = '<div class="card-x">'
@@ -3185,7 +3190,8 @@
     sesFoot('<button class="btn block" id="wrtQuit3">完成了</button>');
     sesEl("wrtQuit3").onclick=wrtClose;
   }
-  if(sesEl("goWrt")) sesEl("goWrt").onclick=wrtOpen;
+  if(sesEl("goWrtZh")) sesEl("goWrtZh").onclick=function(){ wrtOpen("zh"); };
+  if(sesEl("goWrtEn")) sesEl("goWrtEn").onclick=function(){ wrtOpen("en"); };
 
   if(sesEl("goSpeak")) sesEl("goSpeak").onclick=spkOpen;
 
