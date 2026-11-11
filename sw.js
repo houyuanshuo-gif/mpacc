@@ -1,7 +1,7 @@
-// MPAcc 作战台 · Service Worker
-// 策略：stale-while-revalidate（先秒开缓存，再后台更新）
-// 每次发版记得把 C 的版本号 +1，否则手机不会更新
-const C = 'mpacc-v7';
+// MPAcc 作战台 · Service Worker v8
+// 策略：页面导航走「网络优先」（保证更新立刻生效），静态资源走「缓存优先」（秒开）
+// 每次发版把 C 的版本号 +1
+const C = 'mpacc-v8';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -22,22 +22,27 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(hit => {
-      if (hit) {
-        // 命中缓存：立即返回，后台顺手更新
-        fetch(e.request)
-          .then(r => { if (r && r.ok) caches.open(C).then(c => c.put(e.request, r.clone())); })
-          .catch(() => {});
-        return hit;
-      }
-      // 没命中：走网络，成功后写入缓存；失败回退首页
-      return fetch(e.request)
+
+  // 页面：网络优先，断网才用缓存
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
         .then(r => {
-          if (r && r.ok) caches.open(C).then(c => c.put(e.request, r.clone()));
+          if (r && r.ok) caches.open(C).then(c => c.put('./index.html', r.clone()));
           return r;
         })
-        .catch(() => caches.match('./index.html'));
-    })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // 静态资源：缓存优先
+  e.respondWith(
+    caches.match(e.request).then(hit =>
+      hit || fetch(e.request).then(r => {
+        if (r && r.ok) caches.open(C).then(c => c.put(e.request, r.clone()));
+        return r;
+      })
+    )
   );
 });
