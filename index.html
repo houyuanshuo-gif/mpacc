@@ -3110,7 +3110,7 @@
     sesEl("restGo").onclick=sesAdvance;
   }
   // ---------- 作文训练：模板 + 高频词 + 30 分钟 ----------
-  var WRT = {on:false, mode:"zh", type:"arg", tick:null, left:1800, used:[]};
+  var WRT = {on:false, mode:"zh", type:"arg", idx:0, showEssay:false, draft:"", tick:null, left:1800, used:[]};
   var TPL = {
     arg: "开头两句话引述+质疑；中间 4 段，每段「漏洞+为什么错+反例」；结尾一句总结。",
     essay: "引（用材料一句话点题）→ 议（是什么/为什么）→ 联（联系管理或社会现实，举一个具体例子）→ 结（回扣主题，给做法）。",
@@ -3126,7 +3126,7 @@
     clearInterval(SES.tick); SES.tick=null; SES.on=false;
     if(typeof SPK!=="undefined" && SPK.on){ SPK.on=false; clearInterval(SPK.tick); SPK.tick=null; }
     WRT.on=true; WRT.mode=(mode==="en"?"en":"zh"); WRT.type=(WRT.mode==="en"?"en1":"arg");
-    WRT.left=1800; WRT.used=[];
+    WRT.left=1800; WRT.used=[]; WRT.idx=0; WRT.showEssay=false; WRT.draft="";
     sesEl("sess").classList.add("on");
     sesEl("sesTitle").textContent=(WRT.mode==="en"?"英语作文训练":"管综写作训练")+" · 30 分钟";
     sesEl("sesProg").style.width="0%";
@@ -3138,26 +3138,63 @@
     sesEl("sess").classList.remove("on");
   }
   function wrtRender(){
-    var chips = SPEAK.map(function(s,i){ return '<button class="wrt-chip" data-i="'+i+'">'+esc(s.w)+'</button>'; }).join("");
     var TABS = { zh:[["arg","论证有效性分析"],["essay","论说文"]], en:[["en1","英语小作文"],["en2","英语大作文"]] };
     var tabs = TABS[WRT.mode].map(function(t){
       return '<button class="wrt-t'+(WRT.type===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>';
     }).join("");
-    sesEl("sesBody").innerHTML = '<div class="card-x">'
-      +'<div class="row" style="margin-bottom:9px">'+tabs+'</div>'
-      +'<div class="fb" id="wrtTpl"><b>模板骨架</b><br>'+esc(TPL[WRT.type])+'</div>'
-      +'<div class="step-t" id="wrtUsed">高频词 · 点一下插入正文（已用 0 个）</div>'
-      +'<div class="wrt-chips">'+chips+'</div>'
-      +'<textarea id="wrtText" rows="10" placeholder="30 分钟，写完停笔。可以先点上面的词，再展开写。"></textarea>'
-      +'</div>';
+    var html = '<div class="card-x"><div class="row" style="margin-bottom:9px">'+tabs+'</div>';
+    if(WRT.mode==="zh"){
+      var list = (WRT.type==="arg" ? MD.arg : MD.essay) || [];
+      if(!list.length){
+        html += '<div class="empty">范文库是空的，先到「范文库」载入。</div>';
+      } else {
+        if(WRT.idx >= list.length) WRT.idx = 0;
+        var it = list[WRT.idx] || {};
+        html += '<div class="step-t">第 '+(WRT.idx+1)+'/'+list.length+' 篇</div>';
+        html += '<div class="fb"><b>题目</b><br>'+esc(it.t||"")+'</div>';
+        if(WRT.type==="arg"){
+          html += '<div class="fb"><b>材料</b><br>'+esc(it.mat||"")+'</div>';
+          html += '<div class="fb"><b>4 个可攻击的点</b><br>'+(it.holes||[]).map(function(h){ return '· '+esc(h); }).join('<br>')+'</div>';
+        } else {
+          html += '<div class="fb"><b>提纲</b><br>'+(it.outline||[]).map(function(h){ return '· '+esc(h); }).join('<br>')+'</div>';
+          html += '<div class="fb"><b>素材</b><br>'+esc(it.material||"")+'</div>';
+        }
+        html += '<div class="row" style="margin:4px 0 8px">'
+          + '<button class="btn ghost sm" id="wrtNext" style="flex:1">换一篇</button>'
+          + '<button class="btn ghost sm" id="wrtEssayBtn" style="flex:1">'+(WRT.showEssay?'收起范文':'看范文')+'</button>'
+          + '</div>';
+        if(WRT.showEssay){
+          html += '<div class="fb"><b>参考范文</b><br>'+esc(it.essay||"（这篇还没录范文）")+'</div>';
+        }
+      }
+    } else {
+      html += '<div class="fb"><b>模板骨架</b><br>'+esc(TPL[WRT.type])+'</div>';
+      html += '<div class="step-t" id="wrtUsed">高频词 · 点一下插入正文（已用 '+WRT.used.length+' 个）</div>';
+      html += '<div class="wrt-chips">'+SPEAK.map(function(s,i){ return '<button class="wrt-chip" data-i="'+i+'">'+esc(s.w)+'</button>'; }).join("")+'</div>';
+    }
+    html += '<textarea id="wrtText" rows="9" placeholder="30 分钟，写完停笔。"></textarea></div>';
+    sesEl("sesBody").innerHTML = html;
+    var ta = sesEl("wrtText");
+    if(ta){ ta.value = WRT.draft || ""; ta.oninput = function(){ WRT.draft = this.value; }; }
+
     sesFoot('<div class="row"><button class="btn ghost" id="wrtGo" style="flex:1">开始计时</button><button class="btn" id="wrtSave" style="flex:1">保存草稿</button></div>');
+
     sesEl("sesBody").querySelectorAll(".wrt-t").forEach(function(b){
       b.onclick=function(){
-        WRT.type=b.dataset.t;
-        sesEl("sesBody").querySelectorAll(".wrt-t").forEach(function(x){ x.classList.toggle("on", x.dataset.t===WRT.type); });
-        var box=sesEl("wrtTpl"); if(box) box.innerHTML='<b>模板骨架</b><br>'+esc(TPL[WRT.type]);
+        WRT.draft = (sesEl("wrtText")||{}).value || WRT.draft;
+        WRT.type=b.dataset.t; WRT.idx=0; WRT.showEssay=false;
+        wrtRender();
       };
     });
+    if(sesEl("wrtNext")) sesEl("wrtNext").onclick=function(){
+      WRT.draft = (sesEl("wrtText")||{}).value || WRT.draft;
+      var n=(WRT.type==="arg"?MD.arg:MD.essay).length || 1;
+      WRT.idx=(WRT.idx+1)%n; WRT.showEssay=false; wrtRender();
+    };
+    if(sesEl("wrtEssayBtn")) sesEl("wrtEssayBtn").onclick=function(){
+      WRT.draft = (sesEl("wrtText")||{}).value || WRT.draft;
+      WRT.showEssay=!WRT.showEssay; wrtRender();
+    };
     sesEl("sesBody").querySelectorAll(".wrt-chip").forEach(function(b){
       b.onclick=function(){ wrtInsert(SPEAK[parseInt(b.dataset.i,10)].w); };
     });
@@ -3182,10 +3219,12 @@
   }
   function wrtSave(){
     var ta=sesEl("wrtText"); var text=ta?ta.value.trim():"";
+    WRT.draft=text;
     if(!state.wrt) state.wrt=[];
-    state.wrt.unshift({date: today(), type: WRT.type, text: text, words: WRT.used.slice()});
+    state.wrt.unshift({date: today(), mode: WRT.mode, type: WRT.type, text: text, words: WRT.used.slice()});
     save();
-    sesEl("sesBody").innerHTML='<div class="done"><div class="note">草稿已保存 · 用了 '+WRT.used.length+' 个高频词<br>'
+    var tip = WRT.mode==="en" ? ("用了 "+WRT.used.length+" 个高频词") : "已存";
+    sesEl("sesBody").innerHTML='<div class="done"><div class="note">草稿已保存 · '+tip+'<br>'
       +esc(text.slice(0,60))+(text.length>60?'…':'')+'</div></div>';
     sesFoot('<button class="btn block" id="wrtQuit3">完成了</button>');
     sesEl("wrtQuit3").onclick=wrtClose;
