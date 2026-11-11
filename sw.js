@@ -1,7 +1,7 @@
 // MPAcc 作战台 · Service Worker
 // 策略：stale-while-revalidate（先秒开缓存，再后台更新）
 // 每次发版记得把 C 的版本号 +1，否则手机不会更新
-const C = 'mpacc-v5';
+const C = 'mpacc-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
