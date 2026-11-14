@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2022 管综第4题 · 割补法（可控制播放）</title>
+<style>
+  :root{--bg:#0f1216;--card:#171b21;--line:#2a3038;--text:#e8ecf1;--muted:#9aa4b2;--blue:#4f8fd6;--orange:#d9a23a;--green:#4fae7a;--red:#d0615c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+  .wrap{max-width:660px;margin:0 auto;padding:16px 14px 28px}
+  h1{font-size:16px;margin:0 0 4px;font-weight:600}
+  .sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  svg{width:100%;height:auto;display:block;border-radius:10px;background:#12161b}
+  .txt{margin-top:12px;font-size:13.5px;line-height:1.7;color:var(--muted);min-height:58px}
+  .txt b{color:var(--text);display:block;font-size:13px;margin-bottom:2px}
+  .bar{display:flex;gap:8px;align-items:center;margin-top:12px}
+  button{font-family:inherit;font-size:13px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#1f242b;color:var(--text);cursor:pointer;white-space:nowrap}
+  button:active{transform:scale(.98)}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#fff;min-width:92px}
+  button:disabled{opacity:.4}
+  input[type=range]{width:100%;accent-color:var(--blue);margin:12px 0 4px}
+  .dots{display:flex;gap:7px;justify-content:center;margin-top:6px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#3a4250;cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--blue);transform:scale(1.15)}
+  .meta{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+  select{font-family:inherit;font-size:12px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#1f242b;color:var(--text)}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>2022 管综第4题 · 割补法</h1>
+  <div class="sub">8 步演示 · 可暂停、可回看、可拖进度</div>
+  <div class="card">
+    <svg id="svg" viewBox="0 0 600 620" aria-label="几何割补演示"></svg>
+    <div class="txt" id="txt"></div>
+    <div class="bar">
+      <button id="prev">◀ 上一步</button>
+      <button id="play" class="primary">▶ 播放</button>
+      <button id="next">下一步 ▶</button>
+    </div>
+    <input id="scrub" type="range" min="0" max="7" value="0" step="1">
+    <div class="dots" id="dots"></div>
+    <div class="meta">
+      <span>速度</span>
+      <select id="speed">
+        <option value="5200">0.5×</option>
+        <option value="3000" selected>1×</option>
+        <option value="1700">1.8×</option>
+      </select>
+      <span id="stepno" style="margin-left:auto">1/8</span>
+    </div>
+    <div class="hint">左右方向键切换 · 空格播放/暂停 · 点进度条跳转</div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var SCALE = 420, OX = 70, OY = 560;
+  function P(p) { return [OX + p.x * SCALE, OY - p.y * SCALE]; }
+  function pts(arr) {
+    return arr.map(function (p) {
+      var q = P(p);
+      return q[0].toFixed(1) + "," + q[1].toFixed(1);
+    }).join(" ");
+  }
+  function arcPts(cx, cy, r, a1, a2, n) {
+    n = n || 80;
+    var out = [];
+    for (var i = 0; i <= n; i++) {
+      var t = a1 + (a2 - a1) * i / n;
+      out.push({ x: cx + r * Math.cos(t), y: cy + r * Math.sin(t) });
+    }
+    return out;
+  }
+
+  var r = 2 / Math.sqrt(Math.PI);
+  var A = { x: 0, y: 0 }, B = { x: 1, y: 0 }, C = { x: 1, y: 1 };
+  var D = { x: r / Math.SQRT2, y: r / Math.SQRT2 };
+  var E = { x: 1, y: Math.sqrt(r * r - 1) };
+  var F = { x: r, y: 0 };
+  var thD = Math.PI / 4, thE = Math.atan2(E.y, E.x), thF = 0;
+
+  var svg = document.getElementById("svg");
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function add(e, layer) {
+    if (layer) { e.dataset.l = layer; }
+    e.style.transition = "opacity .35s";
+    svg.appendChild(e);
+    return e;
+  }
+  function label(pt, s, dx, dy, size, color) {
+    var q = P(pt);
+    var e = el("text", {
+      x: q[0] + dx, y: q[1] + dy, "font-size": size || 20,
+      fill: color || "#e8ecf1", "font-family": "system-ui,PingFang SC,Microsoft YaHei"
+    });
+    e.textContent = s;
+    return e;
+  }
+
+  // 底图
+  add(el("polygon", { points: pts([A, B, C]), fill: "#12161b", stroke: "#8b95a5", "stroke-width": 2.5 }), "tri");
+  var ps = 0.06;
+  add(el("polyline", {
+    points: pts([{ x: 1 - ps, y: 0 }, { x: 1 - ps, y: ps }, { x: 1, y: ps }]),
+    fill: "none", stroke: "#6b7482", "stroke-width": 1.5
+  }), "ra");
+  add(el("polygon", {
+    points: pts([A].concat(arcPts(0, 0, 0.34, 0, thD))),
+    fill: "rgba(217,162,58,.16)", stroke: "rgba(217,162,58,.6)", "stroke-width": 1.2
+  }), "ang");
+  add(label({ x: 0.36, y: 0.09 }, "45°", 0, 0, 18, "#d9a23a"), "ang");
+
+  // 弧
+  add(el("polyline", {
+    points: pts(arcPts(0, 0, r, 0, thD, 90)),
+    fill: "none", stroke: "#4f8fd6", "stroke-width": 2.6
+  }), "arc");
+
+  // 扇形与区域
+  add(el("polygon", {
+    points: pts([A].concat(arcPts(0, 0, r, 0, thD))),
+    fill: "rgba(217,162,58,.24)", stroke: "rgba(217,162,58,.8)", "stroke-width": 1.6
+  }), "secADF");
+  add(el("polygon", {
+    points: pts([A].concat(arcPts(0, 0, r, thE, thD))),
+    fill: "rgba(79,143,214,.30)", stroke: "rgba(79,143,214,.85)", "stroke-width": 1.6
+  }), "secADE");
+  add(el("polygon", {
+    points: pts([C].concat(arcPts(0, 0, r, thD, thE))),
+    fill: "rgba(208,97,92,.30)", stroke: "rgba(208,97,92,.85)", "stroke-width": 1.6
+  }), "cde");
+  add(el("polygon", {
+    points: pts([A].concat(arcPts(0, 0, r, 0, thE))),
+    fill: "rgba(79,174,122,.30)", stroke: "rgba(79,174,122,.85)", "stroke-width": 1.6
+  }), "secAEF");
+  add(el("polygon", {
+    points: pts([A, B, E]),
+    fill: "rgba(79,143,214,.30)", stroke: "rgba(79,143,214,.85)", "stroke-width": 1.6
+  }), "abe");
+
+  // 点与标签
+  function dot(pt, layer) {
+    var q = P(pt);
+    return add(el("circle", { cx: q[0], cy: q[1], r: 5, fill: "#4f8fd6" }), layer);
+  }
+  dot(D, "pD"); dot(E, "pE"); dot(F, "pF");
+  add(label(A, "A", -26, 8, 20), "lA");
+  add(label(B, "B", 9, 20, 20), "lB");
+  add(label(C, "C", 9, -10, 20), "lC");
+  add(label(D, "D", 8, -12, 19, "#7fb0e6"), "lD");
+  add(label(E, "E", 10, 18, 19, "#7fb0e6"), "lE");
+  add(label(F, "F", 9, 20, 19, "#7fb0e6"), "lF");
+
+  var steps = [
+    { t: "第1步 · 认图", d: "等腰直角三角形 ABC，直角在 B：AB = BC = a，AC = a√2，∠A = 45°。", show: ["tri", "ra", "lA", "lB", "lC"] },
+    { t: "第2步 · 45° 扇形", d: "以 A 为圆心、半径 r 画弧，AC 与 AB 延长线的夹角 ∠DAF = 45°。", show: ["tri", "ra", "ang", "lA", "lB", "lC"] },
+    { t: "第3步 · 画圆", d: "弧交 AC 于 D、交 BC 于 E、交 AB 延长线于 F：AD = AE = AF = r（同圆半径）。", show: ["tri", "ra", "ang", "arc", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] },
+    { t: "第4步 · 扇形 ADF", d: "整个扇形 ADF：半径 r、圆心角 45°，面积 = (45/360)πr² = πr²/8。", show: ["tri", "ra", "arc", "secADF", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] },
+    { t: "第5步 · 拆 CDE", d: "△ACE 被弧 DE 切成两块：蓝块是扇形 ADE，红块是曲边三角形 CDE。所以 S(CDE) = S△ACE − S扇ADE。", show: ["tri", "ra", "arc", "secADE", "cde", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] },
+    { t: "第6步 · 拆 BEF", d: "扇形 AEF 被 BE 切成两块：蓝块是 △ABE，绿块是曲边三角形 BEF。所以 S(BEF) = S扇AEF − S△ABE。", show: ["tri", "ra", "arc", "secAEF", "abe", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] },
+    { t: "第7步 · 两式相加", d: "两式相等后移项：S△ACE + S△ABE = S扇ADE + S扇AEF。左边 = S△ABC，右边 = S扇形ADF。", show: ["tri", "arc", "secADF", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] },
+    { t: "第8步 · 结论", d: "S△ABC = S扇形ADF → ½a² = πr²/8 → r = 2a/√π → AD/AC = √(2/π)。答案 E。", show: ["tri", "arc", "secADF", "pD", "pE", "pF", "lA", "lB", "lC", "lD", "lE", "lF"] }
+  ];
+
+  var cur = 0, playing = false, timer = null;
+  var txt = document.getElementById("txt");
+  var scrub = document.getElementById("scrub");
+  var playBtn = document.getElementById("play");
+  var speed = document.getElementById("speed");
+  var stepno = document.getElementById("stepno");
+  var dotsBox = document.getElementById("dots");
+
+  for (var i = 0; i < steps.length; i++) {
+    var d = document.createElement("i");
+    (function (k) { d.onclick = function () { pause(); setStep(k); }; })(i);
+    dotsBox.appendChild(d);
+  }
+
+  function render(i) {
+    var s = steps[i];
+    var show = {};
+    for (var k = 0; k < s.show.length; k++) show[s.show[k]] = 1;
+    var nodes = svg.querySelectorAll("[data-l]");
+    for (var j = 0; j < nodes.length; j++) {
+      var e = nodes[j];
+      e.style.opacity = show[e.dataset.l] ? 1 : 0;
+    }
+    txt.innerHTML = "<b>" + s.t + "</b>" + s.d;
+    scrub.value = i;
+    stepno.textContent = (i + 1) + "/" + steps.length;
+    var ds = dotsBox.children;
+    for (var k2 = 0; k2 < ds.length; k2++) ds[k2].className = k2 === i ? "on" : "";
+  }
+
+  function setStep(i) {
+    cur = Math.max(0, Math.min(steps.length - 1, i));
+    render(cur);
+  }
+  function next() { if (cur >= steps.length - 1) { pause(); return; } setStep(cur + 1); }
+  function prev() { setStep(cur - 1); }
+
+  function tick() {
+    clearTimeout(timer);
+    if (!playing) return;
+    if (cur >= steps.length - 1) { pause(); return; }
+    setStep(cur + 1);
+    timer = setTimeout(tick, parseInt(speed.value, 10));
+  }
+  function play() {
+    if (cur >= steps.length - 1) setStep(0);
+    playing = true;
+    playBtn.textContent = "⏸ 暂停";
+    timer = setTimeout(tick, 300);
+  }
+  function pause() {
+    playing = false;
+    clearTimeout(timer);
+    playBtn.textContent = "▶ 播放";
+  }
+
+  playBtn.onclick = function () { playing ? pause() : play(); };
+  document.getElementById("next").onclick = function () { pause(); next(); };
+  document.getElementById("prev").onclick = function () { pause(); prev(); };
+  scrub.oninput = function () { pause(); setStep(parseInt(scrub.value, 10)); };
+  speed.onchange = function () { if (playing) { clearTimeout(timer); tick(); } };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") { pause(); next(); }
+    else if (e.key === "ArrowLeft") { pause(); prev(); }
+    else if (e.key === " ") { e.preventDefault(); playing ? pause() : play(); }
+  });
+
+  render(0);
+})();
+</script>
+</body>
+</html>
