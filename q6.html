@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2022 管综第6题 · 立体截面（可控制播放）</title>
+<style>
+  :root{--bg:#0f1216;--card:#171b21;--line:#2a3038;--text:#e8ecf1;--muted:#9aa4b2;--blue:#4f8fd6;--orange:#d9a23a;--green:#4fae7a;--red:#d0615c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+  .wrap{max-width:660px;margin:0 auto;padding:16px 14px 28px}
+  h1{font-size:16px;margin:0 0 4px;font-weight:600}
+  .sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  svg{width:100%;height:auto;display:block;border-radius:10px;background:#12161b}
+  .txt{margin-top:12px;font-size:13.5px;line-height:1.7;color:var(--muted);min-height:64px}
+  .txt b{color:var(--text);display:block;font-size:13px;margin-bottom:2px}
+  .bar{display:flex;gap:8px;align-items:center;margin-top:12px}
+  button{font-family:inherit;font-size:13px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#1f242b;color:var(--text);cursor:pointer;white-space:nowrap}
+  button:active{transform:scale(.98)}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#fff;min-width:92px}
+  input[type=range]{width:100%;accent-color:var(--blue);margin:12px 0 4px}
+  .dots{display:flex;gap:7px;justify-content:center;margin-top:6px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#3a4250;cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--blue);transform:scale(1.15)}
+  .meta{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+  select{font-family:inherit;font-size:12px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#1f242b;color:var(--text)}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>2022 管综第6题 · 立体截面</h1>
+  <div class="sub">8 步演示 · 3D 视角 · 可暂停/回看/拖进度</div>
+  <div class="card">
+    <svg id="svg" viewBox="0 0 600 620" aria-label="正方体截面演示"></svg>
+    <div class="txt" id="txt"></div>
+    <div class="bar">
+      <button id="prev">◀ 上一步</button>
+      <button id="play" class="primary">▶ 播放</button>
+      <button id="next">下一步 ▶</button>
+    </div>
+    <input id="scrub" type="range" min="0" max="7" value="0" step="1">
+    <div class="dots" id="dots"></div>
+    <div class="meta">
+      <span>速度</span>
+      <select id="speed">
+        <option value="5200">0.5×</option>
+        <option value="3000" selected>1×</option>
+        <option value="1700">1.8×</option>
+      </select>
+      <span id="stepno" style="margin-left:auto">1/8</span>
+    </div>
+    <div class="hint">左右方向键切换 · 空格播放/暂停 · 点进度条跳转</div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var S = 120, OX = 120, OY = 520;
+  function pr(p) {
+    return [OX + (p[0] + 0.5 * p[1]) * S, OY - (p[2] + 0.25 * p[1]) * S];
+  }
+  function pt(p) { var q = pr(p); return q[0].toFixed(1) + "," + q[1].toFixed(1); }
+  function linePts(a, b) { return pt(a) + " " + pt(b); }
+  function mid(a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]; }
+
+  var V = [
+    [0,0,0],[2,0,0],[2,2,0],[0,2,0],
+    [0,0,2],[2,0,2],[2,2,2],[0,2,2]
+  ];
+  var EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  var A = [0,0,0], B = [2,2,0], C = [2,1,2], D = [1,0,2];
+
+  var svg = document.getElementById("svg");
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function add(e, layer) {
+    if (layer) e.dataset.l = layer;
+    e.style.transition = "opacity .35s";
+    svg.appendChild(e);
+    return e;
+  }
+  function textAt(p, s, dx, dy, size, color) {
+    var q = pr(p);
+    var e = el("text", {
+      x: q[0] + dx, y: q[1] + dy, "font-size": size || 18,
+      fill: color || "#e8ecf1", "font-family": "system-ui,PingFang SC,Microsoft YaHei"
+    });
+    e.textContent = s;
+    return e;
+  }
+
+  // 立方体 12 条棱
+  for (var i = 0; i < EDGES.length; i++) {
+    var a = V[EDGES[i][0]], b = V[EDGES[i][1]];
+    add(el("polyline", { points: linePts(a, b), fill: "none", stroke: "#6b7482", "stroke-width": 1.8 }), "cube");
+  }
+
+  // 顶点 A、B
+  add(el("circle", { cx: pr(A)[0], cy: pr(A)[1], r: 5.5, fill: "#d0615c" }), "pA");
+  add(el("circle", { cx: pr(B)[0], cy: pr(B)[1], r: 5.5, fill: "#d0615c" }), "pB");
+  add(textAt(A, "A", -24, 22, 19), "lA");
+  add(textAt(B, "B", 10, 20, 19), "lB");
+
+  // 中点 C、D
+  add(el("circle", { cx: pr(C)[0], cy: pr(C)[1], r: 5.5, fill: "#4f8fd6" }), "pC");
+  add(el("circle", { cx: pr(D)[0], cy: pr(D)[1], r: 5.5, fill: "#4f8fd6" }), "pD");
+  add(textAt(C, "C", 10, 6, 19, "#7fb0e6"), "lC");
+  add(textAt(D, "D", -26, 4, 19, "#7fb0e6"), "lD");
+
+  // 四条边
+  add(el("polyline", { points: linePts(A, B), fill: "none", stroke: "#d0615c", "stroke-width": 3 }), "eAB");
+  add(el("polyline", { points: linePts(C, D), fill: "none", stroke: "#d0615c", "stroke-width": 3 }), "eCD");
+  add(el("polyline", { points: linePts(B, C), fill: "none", stroke: "#d9a23a", "stroke-width": 3 }), "eBC");
+  add(el("polyline", { points: linePts(A, D), fill: "none", stroke: "#d9a23a", "stroke-width": 3 }), "eAD");
+
+  // 梯形填充
+  add(el("polygon", { points: pt(A) + " " + pt(B) + " " + pt(C) + " " + pt(D), fill: "rgba(79,143,214,.18)", stroke: "none" }), "fill");
+
+  // 边长标注
+  add(textAt(mid(A, B), "AB = 2√2", -30, 26, 16, "#e79a95"), "tAB");
+  add(textAt(mid(C, D), "CD = √2", -30, -12, 16, "#e79a95"), "tCD");
+  add(textAt(mid(B, C), "BC = √5", 12, 4, 15, "#e0b76a"), "tBC");
+  add(textAt(mid(A, D), "AD = √5", -70, -6, 15, "#e0b76a"), "tAD");
+
+  var steps = [
+    { t: "第1步 · 正方体", d: "棱长 2 的正方体。A、B 是顶点，C、D 是所在棱的中点。", show: ["cube"] },
+    { t: "第2步 · 找 A、B", d: "A、B 是同一底面的一条面对角线的两个端点。", show: ["cube", "pA", "pB", "lA", "lB"] },
+    { t: "第3步 · 找 C、D", d: "C、D 在顶面：分别是两条相邻棱的中点。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD"] },
+    { t: "第4步 · 连 AB", d: "AB 是底面的面对角线：AB = √(2²+2²) = 2√2。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD", "eAB", "tAB"] },
+    { t: "第5步 · 连 CD", d: "C、D 是相邻两棱的中点，CD = √(1²+1²) = √2，且 CD ∥ AB。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD", "eAB", "tAB", "eCD", "tCD"] },
+    { t: "第6步 · 连两腰", d: "BC = √(0²+1²+2²) = √5，AD = √(1²+0²+2²) = √5。两腰相等。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD", "eAB", "tAB", "eCD", "tCD", "eBC", "tBC", "eAD", "tAD"] },
+    { t: "第7步 · 等腰梯形", d: "AB ∥ CD，BC = AD = √5 → 四边形 ABCD 是等腰梯形。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD", "eAB", "tAB", "eCD", "tCD", "eBC", "tBC", "eAD", "tAD", "fill"] },
+    { t: "第8步 · 求面积", d: "高 h = √(BC² − ((AB−CD)/2)²) = √(5 − ½) = 3√2/2。S = ½(2√2+√2)·h = 9/2。答案 A。", show: ["cube", "pA", "pB", "lA", "lB", "pC", "pD", "lC", "lD", "eAB", "tAB", "eCD", "tCD", "eBC", "tBC", "eAD", "tAD", "fill"] }
+  ];
+
+  var cur = 0, playing = false, timer = null;
+  var txt = document.getElementById("txt");
+  var scrub = document.getElementById("scrub");
+  var playBtn = document.getElementById("play");
+  var speed = document.getElementById("speed");
+  var stepno = document.getElementById("stepno");
+  var dotsBox = document.getElementById("dots");
+
+  for (var k = 0; k < steps.length; k++) {
+    var d = document.createElement("i");
+    (function (idx) { d.onclick = function () { pause(); setStep(idx); }; })(k);
+    dotsBox.appendChild(d);
+  }
+
+  function render(i) {
+    var s = steps[i];
+    var show = {};
+    for (var m = 0; m < s.show.length; m++) show[s.show[m]] = 1;
+    var nodes = svg.querySelectorAll("[data-l]");
+    for (var n = 0; n < nodes.length; n++) {
+      var e = nodes[n];
+      e.style.opacity = show[e.dataset.l] ? 1 : 0;
+    }
+    txt.innerHTML = "<b>" + s.t + "</b>" + s.d;
+    scrub.value = i;
+    stepno.textContent = (i + 1) + "/" + steps.length;
+    var ds = dotsBox.children;
+    for (var q = 0; q < ds.length; q++) ds[q].className = q === i ? "on" : "";
+  }
+
+  function setStep(i) { cur = Math.max(0, Math.min(steps.length - 1, i)); render(cur); }
+  function next() { if (cur >= steps.length - 1) { pause(); return; } setStep(cur + 1); }
+  function prev() { setStep(cur - 1); }
+
+  function tick() {
+    clearTimeout(timer);
+    if (!playing) return;
+    if (cur >= steps.length - 1) { pause(); return; }
+    setStep(cur + 1);
+    timer = setTimeout(tick, parseInt(speed.value, 10));
+  }
+  function play() {
+    if (cur >= steps.length - 1) setStep(0);
+    playing = true;
+    playBtn.textContent = "⏸ 暂停";
+    timer = setTimeout(tick, 300);
+  }
+  function pause() {
+    playing = false;
+    clearTimeout(timer);
+    playBtn.textContent = "▶ 播放";
+  }
+
+  playBtn.onclick = function () { playing ? pause() : play(); };
+  document.getElementById("next").onclick = function () { pause(); next(); };
+  document.getElementById("prev").onclick = function () { pause(); prev(); };
+  scrub.oninput = function () { pause(); setStep(parseInt(scrub.value, 10)); };
+  speed.onchange = function () { if (playing) { clearTimeout(timer); tick(); } };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") { pause(); next(); }
+    else if (e.key === "ArrowLeft") { pause(); prev(); }
+    else if (e.key === " ") { e.preventDefault(); playing ? pause() : play(); }
+  });
+
+  render(0);
+})();
+</script>
+</body>
+</html>
