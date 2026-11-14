@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2022 管综第13题 · 插空法（可控制播放）</title>
+<style>
+  :root{--bg:#0f1216;--card:#171b21;--line:#2a3038;--text:#e8ecf1;--muted:#9aa4b2;--blue:#4f8fd6;--orange:#d9a23a;--green:#4fae7a;--red:#d0615c;--pink:#d070a0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+  .wrap{max-width:660px;margin:0 auto;padding:16px 14px 28px}
+  h1{font-size:16px;margin:0 0 4px;font-weight:600}
+  .sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  svg{width:100%;height:auto;display:block;border-radius:10px;background:#12161b}
+  .txt{margin-top:12px;font-size:13.5px;line-height:1.7;color:var(--muted);min-height:64px}
+  .txt b{color:var(--text);display:block;font-size:13px;margin-bottom:2px}
+  .bar{display:flex;gap:8px;align-items:center;margin-top:12px}
+  button{font-family:inherit;font-size:13px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#1f242b;color:var(--text);cursor:pointer;white-space:nowrap}
+  button:active{transform:scale(.98)}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#fff;min-width:92px}
+  input[type=range]{width:100%;accent-color:var(--blue);margin:12px 0 4px}
+  .dots{display:flex;gap:7px;justify-content:center;margin-top:6px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#3a4250;cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--blue);transform:scale(1.15)}
+  .meta{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+  select{font-family:inherit;font-size:12px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#1f242b;color:var(--text)}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>2022 管综第13题 · 插空法</h1>
+  <div class="sub">7 步演示 · 4 男 2 女 · 可暂停/回看/拖进度</div>
+  <div class="card">
+    <svg id="svg" viewBox="0 0 600 620" aria-label="插空法演示"></svg>
+    <div class="txt" id="txt"></div>
+    <div class="bar">
+      <button id="prev">◀ 上一步</button>
+      <button id="play" class="primary">▶ 播放</button>
+      <button id="next">下一步 ▶</button>
+    </div>
+    <input id="scrub" type="range" min="0" max="6" value="0" step="1">
+    <div class="dots" id="dots"></div>
+    <div class="meta">
+      <span>速度</span>
+      <select id="speed">
+        <option value="5200">0.5×</option>
+        <option value="3000" selected>1×</option>
+        <option value="1700">1.8×</option>
+      </select>
+      <span id="stepno" style="margin-left:auto">1/7</span>
+    </div>
+    <div class="hint">左右方向键切换 · 空格播放/暂停 · 点进度条跳转</div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("svg");
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function tx(x, y, s, size, color, anchor) {
+    var e = el("text", { x: x, y: y, "font-size": size, fill: color, "font-family": "system-ui,PingFang SC,Microsoft YaHei" });
+    if (anchor) e.setAttribute("text-anchor", anchor);
+    e.textContent = s;
+    return e;
+  }
+  function layer(name) {
+    var g = el("g", {});
+    g.dataset.l = name;
+    g.style.transition = "opacity .35s";
+    svg.appendChild(g);
+    return g;
+  }
+
+  var BY = 210, BW = 70, BH = 70;
+  var BX = [150, 250, 350, 450];
+  var GX = [100, 200, 300, 400, 500];
+
+  // 男生
+  var gBoys = layer("boys");
+  for (var i = 0; i < 4; i++) {
+    gBoys.appendChild(el("rect", { x: BX[i] - BW / 2, y: BY - BH / 2, width: BW, height: BH, rx: 14, fill: "rgba(79,143,214,.14)", stroke: "#4f8fd6", "stroke-width": 2 }));
+    gBoys.appendChild(tx(BX[i], BY + 7, "男", 22, "#7fb0e6", "middle"));
+  }
+
+  // 5 个空
+  var gGaps = layer("gaps");
+  for (var j = 0; j < 5; j++) {
+    gGaps.appendChild(el("circle", { cx: GX[j], cy: BY, r: 26, fill: "none", stroke: "#6b7482", "stroke-width": 1.6, "stroke-dasharray": "5 4" }));
+    gGaps.appendChild(tx(GX[j], BY - 34, String(j + 1), 12, "#6b7482", "middle"));
+  }
+
+  // 两端禁用
+  var gBad = layer("bad");
+  [0, 4].forEach(function (k) {
+    gBad.appendChild(el("circle", { cx: GX[k], cy: BY, r: 26, fill: "rgba(208,97,92,.15)", stroke: "#d0615c", "stroke-width": 2 }));
+    gBad.appendChild(tx(GX[k], BY + 8, "×", 26, "#d0615c", "middle"));
+  });
+
+  // 中间 3 个可用
+  var gGood = layer("good");
+  [1, 2, 3].forEach(function (k) {
+    gGood.appendChild(el("circle", { cx: GX[k], cy: BY, r: 26, fill: "rgba(79,174,122,.16)", stroke: "#4fae7a", "stroke-width": 2 }));
+  });
+
+  // 示例：女生站 2、4 号空
+  var gGirls = layer("girls");
+  [1, 3].forEach(function (k, idx) {
+    gGirls.appendChild(el("circle", { cx: GX[k], cy: BY, r: 22, fill: "rgba(208,112,160,.25)", stroke: "#d070a0", "stroke-width": 2 }));
+    gGirls.appendChild(tx(GX[k], BY + 6, "女" + (idx + 1), 14, "#e59ac0", "middle"));
+  });
+
+  // 文字区
+  var gTotal = layer("total");
+  gTotal.appendChild(tx(300, 300, "总排列：6! = 720", 26, "#e8ecf1", "middle"));
+
+  var gCount = layer("count");
+  gCount.appendChild(tx(70, 420, "先排 4 男：4! = 24", 17, "#7fb0e6"));
+  gCount.appendChild(tx(70, 452, "中间 3 个空选 2 个：C(3,2) = 3", 17, "#79c99a"));
+  gCount.appendChild(tx(70, 484, "两个女生排序：2! = 2", 17, "#e59ac0"));
+  gCount.appendChild(tx(70, 516, "有利排法 = 24 × 3 × 2 = 144", 17, "#e8ecf1"));
+
+  var gFormula = layer("formula");
+  gFormula.appendChild(tx(70, 566, "P = 144 / 720 = 1/5", 24, "#f0c040"));
+  gFormula.appendChild(tx(70, 600, "答案：E", 20, "#f0c040"));
+
+  var steps = [
+    { show: [], t: "第1步 · 题目", d: "4 名男生、2 名女生随机站成一排。求：女生既不在两端、也不相邻的概率。" },
+    { show: ["total"], t: "第2步 · 总排法", d: "6 个人全排列：6! = 720 种，这是分母。" },
+    { show: ["boys", "gaps"], t: "第3步 · 先排男生", d: "先把 4 个男生排好：4! = 24 种。4 个男生之间和两端，一共形成 5 个空。" },
+    { show: ["boys", "gaps", "bad"], t: "第4步 · 砍掉两端", d: "女生不在两端 → 第 1、5 号空不能用（打 ×），只剩中间 3 个空。" },
+    { show: ["boys", "gaps", "bad", "good", "girls"], t: "第5步 · 插入女生", d: "女生不相邻 → 每个空最多插 1 人。示例：女1 站 2 号空、女2 站 4 号空。" },
+    { show: ["boys", "gaps", "bad", "good", "count"], t: "第6步 · 算有利排法", d: "中间 3 个空选 2 个：C(3,2)=3；两个女生谁站哪个空：2!=2。所以每个男生排列对应 3×2=6 种，共 24×6=144。" },
+    { show: ["boys", "gaps", "bad", "good", "count", "formula"], t: "第7步 · 求概率", d: "P = 有利 / 总数 = 144 / 720 = 1/5。答案 E。" }
+  ];
+
+  var cur = 0, playing = false, timer = null;
+  var txt = document.getElementById("txt");
+  var scrub = document.getElementById("scrub");
+  var playBtn = document.getElementById("play");
+  var speed = document.getElementById("speed");
+  var stepno = document.getElementById("stepno");
+  var dotsBox = document.getElementById("dots");
+
+  for (var q = 0; q < steps.length; q++) {
+    var d = document.createElement("i");
+    (function (idx) { d.onclick = function () { pause(); setStep(idx); }; })(q);
+    dotsBox.appendChild(d);
+  }
+
+  function render(i) {
+    var s = steps[i];
+    var show = {};
+    for (var m = 0; m < s.show.length; m++) show[s.show[m]] = 1;
+    var nodes = svg.querySelectorAll("[data-l]");
+    for (var n = 0; n < nodes.length; n++) {
+      var e = nodes[n];
+      e.style.opacity = show[e.dataset.l] ? 1 : 0;
+    }
+    txt.innerHTML = "<b>" + s.t + "</b>" + s.d;
+    scrub.value = i;
+    stepno.textContent = (i + 1) + "/" + steps.length;
+    var ds = dotsBox.children;
+    for (var w = 0; w < ds.length; w++) ds[w].className = w === i ? "on" : "";
+  }
+
+  function setStep(i) { cur = Math.max(0, Math.min(steps.length - 1, i)); render(cur); }
+  function next() { if (cur >= steps.length - 1) { pause(); return; } setStep(cur + 1); }
+  function prev() { setStep(cur - 1); }
+
+  function tick() {
+    clearTimeout(timer);
+    if (!playing) return;
+    if (cur >= steps.length - 1) { pause(); return; }
+    setStep(cur + 1);
+    timer = setTimeout(tick, parseInt(speed.value, 10));
+  }
+  function play() {
+    if (cur >= steps.length - 1) setStep(0);
+    playing = true;
+    playBtn.textContent = "⏸ 暂停";
+    timer = setTimeout(tick, 300);
+  }
+  function pause() {
+    playing = false;
+    clearTimeout(timer);
+    playBtn.textContent = "▶ 播放";
+  }
+
+  playBtn.onclick = function () { playing ? pause() : play(); };
+  document.getElementById("next").onclick = function () { pause(); next(); };
+  document.getElementById("prev").onclick = function () { pause(); prev(); };
+  scrub.oninput = function () { pause(); setStep(parseInt(scrub.value, 10)); };
+  speed.onchange = function () { if (playing) { clearTimeout(timer); tick(); } };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") { pause(); next(); }
+    else if (e.key === "ArrowLeft") { pause(); prev(); }
+    else if (e.key === " ") { e.preventDefault(); playing ? pause() : play(); }
+  });
+
+  render(0);
+})();
+</script>
+</body>
+</html>
