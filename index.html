@@ -314,6 +314,42 @@
   #wheelSvg path.wl:hover{stroke:#1B1F23;stroke-width:1.7}
   #wheelSvg path.wl.sel{stroke:#1B1F23;stroke-width:2.2}
   #wheelSvg path.wl.dim{fill-opacity:.08 !important}
+
+  /* ---- 写作 / 词表 / 性价比 ---- */
+  .wt-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+  .wt-tab{flex:1;min-width:80px;padding:8px 6px;border:1px solid var(--line);background:var(--surface);
+    color:var(--muted);border-radius:9px;font-size:12.5px;font-family:var(--font);cursor:pointer}
+  .wt-tab.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .wt-sets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px;align-items:center}
+  .wt-set{padding:5px 10px;border:1px solid var(--line);background:var(--surface);border-radius:99px;
+    font-size:11.5px;color:var(--muted);font-family:var(--font);cursor:pointer}
+  .wt-set.on{border-color:var(--brand);color:var(--brand);background:var(--brand-2)}
+  .wseg{border:1px solid var(--line);border-radius:11px;padding:10px 11px;margin:0 0 9px;background:var(--surface)}
+  .wseg-h{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .wseg-h b{font-size:13px;flex:1}
+  .wbadge{font-size:10px;color:var(--brand);background:var(--brand-2);border-radius:99px;padding:1px 7px}
+  .wseg-s{font-size:13.5px;line-height:1.95;letter-spacing:.01em}
+  .wseg-x{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+  .wta{width:100%;font-size:13.5px;line-height:1.9}
+  .wscore{font-size:12.5px;color:var(--brand);font-weight:600;margin:6px 0}
+  .wm{font-size:12px;line-height:1.7;color:var(--muted)}
+  .wm.hit{color:#2F855A}
+  .pbar2{height:5px;background:var(--surface-2);border-radius:3px;margin-top:6px;overflow:hidden}
+  .pbar2 i{display:block;height:100%;background:var(--brand)}
+  .wrow{display:flex;flex-wrap:wrap;gap:6px}
+  .wchip{font-size:11.5px;border:1px solid var(--line);border-radius:8px;padding:4px 8px;cursor:pointer;
+    display:inline-flex;gap:5px;align-items:center;color:var(--muted)}
+  .wchip b{font-size:12.5px;color:var(--text)}
+  .wchip.ok{background:var(--brand-2);border-color:var(--brand)}
+  .wchip.ok b{color:var(--brand)}
+  .wf{text-align:center;padding:18px 10px;border:1px dashed var(--line);border-radius:12px}
+  .wf-w{font-size:30px;font-weight:700;letter-spacing:.02em}
+  .wf-m{font-size:14px;color:var(--muted);margin:10px 0 14px;min-height:22px}
+  .wf-c{display:inline-block;margin-left:8px;font-size:10px;color:var(--brand);background:var(--brand-2);border-radius:99px;padding:1px 7px}
+  table.roi{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.roi th{font-size:10.5px;color:var(--muted);text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+  table.roi td{padding:7px 4px;border-bottom:1px solid #F1F2F4;vertical-align:top}
+  table.roi .fs{font-size:10px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -633,6 +669,12 @@
 
     <!-- 单词 -->
     <section id="p-words">
+      <div class="card" id="plan25Card">
+        <h2>25 天词表 <small>按 2015–2026 真题阅读词频分层</small></h2>
+        <div id="plan25Head" class="note" style="margin:0 0 8px"></div>
+        <div id="plan25Body"></div>
+      </div>
+
       <div class="card">
         <h2>单词卡 <small id="wCount"></small></h2>
         <div id="flashArea"></div>
@@ -720,6 +762,14 @@
 
     <!-- 数据 -->
     <section id="p-data">
+      <div class="card" id="roiCard">
+        <h2>数学性价比 <small>频次 ÷ 学习成本</small></h2>
+        <div id="roiHead" class="note" style="margin:0 0 8px"></div>
+        <div id="roiBody"></div>
+        <div class="note">性价比 = 十年频次 ÷ 成本（公式型 1 / 套路型 2 / 综合型 3）。同样的 1 小时，先花在高性价比那几行。</div>
+      </div>
+
+
       <div class="card">
         <h2>模考记录 <small>管综 0-200 / 英语 0-100</small></h2>
         <div class="row" style="margin-bottom:7px">
@@ -838,7 +888,17 @@
     </div>
 
   
-        <section id="p-wheel">
+    <section id="p-write">
+      <div class="card">
+        <h2>成段模板 <small>背整段，不背骨架</small></h2>
+        <div class="wt-tabs" id="wtTabs"></div>
+        <div class="wt-sets" id="wtSets"></div>
+        <div id="wtBody"></div>
+        <div class="note" style="margin-top:10px">用法：点「遮住」把这一段藏起来，自己在纸上或输入框里写；提交后按句子对比，漏了哪句会标出来。同一天把同一段写 3 遍，比看 10 遍有用。</div>
+      </div>
+    </section>
+
+    <section id="p-wheel">
       <div class="card">
         <h2>四科轮盘 <small>数学 95 考点 · 逻辑 12 模块 · 英语 10 模块 · 写作 12 题型</small></h2>
         <div class="wl-tabs"><button class="wl-tab on" data-sub="math">数学 <b>95</b></button><button class="wl-tab" data-sub="logic">逻辑 <b>12</b></button><button class="wl-tab" data-sub="en">英语 <b>10</b></button><button class="wl-tab" data-sub="wr">写作 <b>12</b></button></div>
@@ -873,6 +933,7 @@
     <button data-p="yy"><i>A</i>英语</button>
     <button data-p="wrong"><i>✕</i>错题</button>
     <button data-p="data"><i>▤</i>数据</button>
+    <button data-p="write"><i>✎</i>写作</button>
     <button data-p="wheel"><i>◎</i>轮盘</button>
   </div>
 </nav>
@@ -3532,6 +3593,177 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
       det.scrollIntoView({behavior:"smooth",block:"center"});
     },2200);
   });
+})();
+</script>
+
+<script>
+(function(){
+  var W = [{"id": "arg", "name": "论证有效性分析", "meta": "30 分 · 600 字 · 25–30 分钟", "sets": [{"name": "通用版（4 个漏洞）", "segs": [["开头段", "上文通过一系列论证，得出了「　　」的结论。乍看言之成理，细究之下却不难发现，其论证过程在概念界定、样本选取、因果推断与条件关系上均存在明显漏洞，现择其要点分析如下。"], ["概念类漏洞", "首先，材料将「　　」与「　　」混为一谈。二者看似相近，实则内涵不同：前者强调的是……，后者指向的却是……。概念的偷换使后续推理失去了共同的基础，建立在其上的结论自然难以成立。"], ["样本·以偏概全", "其次，材料仅凭「　　」这一有限样本，就推及整体，属于以偏概全。样本数量是否充足、样本是否具有代表性，材料均未作说明。倘若样本本身存在偏差，由此得出的普遍性结论便站不住脚。"], ["因果推断", "再次，材料认为「　　」必然导致「　　」，这一因果判断过于武断。二者之间也许只是相关关系，也可能存在相反的作用方向，甚至由第三个因素同时导致。在排除这些可能之前，不能认定前者是后者的原因。"], ["条件·绝对化", "最后，材料断言「只有……才能……」，实则把充分条件当成了必要条件。事实上，通过……同样可以达到目的。这一绝对化表述，进一步削弱了论证的说服力。"], ["结尾段", "综上所述，材料在概念、样本、因果与条件四个层面均存在漏洞，其结论的可靠性因此大打折扣。若要增强论证力度，还需补充更严谨的数据、更充分的样本以及更清晰的因果链条。"]]}, {"name": "快写版（25 分钟·3 个漏洞）", "segs": [["开头段（3 句）", "上文由「　　」推出「　　」的结论，论证看似完整，实则存在多处逻辑缺陷。以下择其三处略作分析。"], ["漏洞一（概念/样本）", "其一，材料把「　　」等同于「　　」，概念界定含混。概念一旦被偷换，后续推理便成了无源之水。"], ["漏洞二（因果）", "其二，材料由「　　」推断「　　」，忽视了二者可能同受第三因素影响，也未排除因果倒置的可能。"], ["漏洞三（条件）+ 收尾", "其三，材料以「只有……才……」立论，把必要条件误作充分条件。综上，该论证尚需更多证据支撑，其结论不宜轻信。"]]}]}, {"id": "essay", "name": "论说文", "meta": "35 分 · 700 字 · 35 分钟", "sets": [{"name": "通用版（引·议·联·结）", "segs": [["引论段", "　　（现象或名言）引出话题。在我看来，　　（中心论点）。这不仅是个人成长的内在要求，更是时代赋予我们的现实课题。"], ["分论点一（是什么/为什么）", "首先，　　。所谓　　，并非……，而是……。唯有如此，才能在纷繁的选择中守住方向。正如　　（事例，一句带过）。可见，　　。"], ["分论点二（怎么做/更深一层）", "其次，　　。如果说前者解决的是「愿不愿」，那么后者解决的则是「能不能」。　　（事例或数据）。这也正是许多人在同一件事上拉开差距的原因。"], ["联系现实段", "反观当下，　　（反面现象）并不鲜见。其根源，既在于……，也在于……。若任其蔓延，不仅……，更会……。因此，　　。"], ["结论段", "行文至此，可以得出结论：　　。于个人，它是……；于社会，它是……。愿我们都能在　　中，成为更好的自己。"]]}, {"name": "主题素材段（可直接嵌入）", "segs": [["创新", "创新从来不是凭空而来的灵光一现，而是长期积累之后的厚积薄发。华为用十余年打磨芯片与操作系统，才在封锁面前站稳脚跟。可见，真正的创新，是把冷板凳坐热的耐心。"], ["坚持", "坚持的价值，往往在时间的另一端才显现。敦煌研究院的樊锦诗，在大漠里守了半个多世纪，才让千年壁画以数字形态重获新生。所谓长期主义，不过是把一件对的事，重复到别人放弃为止。"], ["合作", "合作不是简单的相加，而是彼此长板的相乘。长三角的产业链协同，让一家企业的技术突破迅速变成一群企业的共同进步。懂得让利，才可能共赢；愿意补位，才可能成事。"]]}]}, {"id": "ens", "name": "英语小作文", "meta": "10 分 · 100 词 · 15 分钟", "sets": [{"name": "建议信（Letter of Suggestion）", "segs": [["第一段：说明写信目的", "Dear Professor Wang,\nI am writing to offer my suggestions on how to improve the career service for graduating students in our university."], ["第二段：两条具体建议", "First, it would be helpful to invite more alumni to share their job-hunting experience, since their stories are closer to what we are facing. Second, the career center could publish a weekly newsletter listing internships, so that students will not miss deadlines."], ["第三段：客气收尾", "I would appreciate it if you could take my suggestions into consideration. Thank you for your time and I am looking forward to your reply.\nYours sincerely,\nLi Ming"]]}, {"name": "通知（Notice）", "segs": [["标题与事由", "NOTICE\nIn order to help students improve their English writing, a lecture on IELTS and CET writing will be held in the main hall at 7 p.m. on December 12."], ["具体安排", "The lecture will be given by Professor Smith, who has been teaching writing for over twenty years. All students are welcome to attend, and those who are interested are expected to bring a sample essay of their own for on-site comments."], ["报名与落款", "Please sign up at the Student Union office before December 10. For further information, call 8888-6666.\nThe Student Union"]]}]}, {"id": "enb", "name": "英语大作文", "meta": "15 分 · 150 词 · 25 分钟", "sets": [{"name": "柱状图（Bar Chart）", "segs": [["第一段：描述图表", "As is vividly shown in the bar chart, the number of people who choose to work from home rose steadily from 12% in 2019 to 38% in 2023, while the figure for those working in offices dropped from 70% to 52%."], ["第二段：分析原因（两条）", "Several factors may account for this shift. To begin with, the rapid development of digital tools has made remote work technically possible, which saves both commuting time and office costs. In addition, the pandemic has changed people’s attitudes toward work, and many now value flexibility more than a fixed workplace."], ["第三段：影响/评价", "This trend brings both opportunities and challenges. On the one hand, it offers employees more freedom; on the other hand, it may weaken team bonds. Therefore, companies should design better rules rather than simply follow the trend."], ["第四段：结论（一句）", "In short, the change reflected in the chart is not temporary, and how we adapt to it will determine who benefits from it."]]}, {"name": "饼图（Pie Chart）", "segs": [["第一段：描述图表", "The pie chart illustrates how urban residents spent their leisure time in 2023. Watching short videos accounted for 35%, the largest share, followed by sports (25%) and reading (18%), with the remaining 22% spent on other activities."], ["第二段：分析原因（两条）", "Two reasons stand out. First, short videos are cheap and easily accessible, and they fit the fragmented time of city life. Second, people are increasingly aware of health, which explains why sports rank second."], ["第三段：评价与建议", "However, the dominance of short videos deserves attention, for it may crowd out deep reading and real communication. It is advisable for individuals to set a daily time limit and to spend more time on activities that require sustained attention."], ["第四段：结论（一句）", "In conclusion, how we spend our leisure time is, to a large extent, how we shape ourselves."]]}]}], WD = {"p0": [["share", "n. 股份; v. 分享", 23], ["mean", "adj. 吝啬的; v. 意思是, 打算", 21], ["gap", "n. 间隔, 分歧", 21], ["seem", "v. 似乎, 好像", 20], ["effect", "n. 影响; v. 引起, 使发生", 19], ["economy", "n. 经济", 19], ["industry", "n. 工业, 行业", 17], ["provide", "v. 提供", 16], ["involve", "v. 涉及, 加入", 15], ["manufacture", "n. 制造; 生产", 15], ["community", "n. 社区; 团体", 14], ["consider", "v. 仔细考虑, 认为", 14], ["plastic", "n. 塑料 adj. 塑料的", 14], ["technology", "n. 科技", 14], ["offer", "v. 提供; n. 提议", 14], ["common", "adj. 普通的, 共同的", 13], ["concern", "v. 涉及, 担忧; n. 关心", 13], ["expert", "n. 专家; adj. 内行的", 12], ["significant", "adj. 意义重大的", 12], ["given", "prep. 鉴于; adj. 规定的, 指定的", 12], ["pattern", "n. 模式", 12], ["impact", "n. 影响; v. 有影响", 12], ["means", "n. 方法", 11], ["local", "adj. 本地的, 地方的", 11], ["wood", "n. 木头", 11], ["remain", "v. 保持, 继续", 11], ["allow", "v. 允许", 11], ["million", "n. 百万", 11], ["instead", "adv. 代替, 反而", 11], ["design", "v. 设计, 制定", 11], ["average", "adj. 平均的; n. 平均数", 11], ["decade", "n. 十年; 十年期", 10], ["field", "n. 田地, 领域", 10], ["approach", "n. 方法; v. 接近, 处理", 10], ["individual", "adj. 个人的, 独特的", 10], ["measure", "v. 测量; n. 措施", 10], ["economic", "adj. 经济上的", 10], ["expect", "v. 预期", 9], ["potential", "adj. 潜在的, 可能的", 9], ["particular", "adj. 特别的, 挑剔的", 9], ["range", "n. 一系列, 范围", 9], ["capacity", "n. 能力, 容积", 9], ["estate", "n. 地产", 9], ["overall", "adj. 全面的; n. 工作服", 9], ["appear", "v. 出现, 似乎", 8], ["cover", "n. 封面; v. 覆盖, 包含", 8], ["account", "n. 账戶, 描述", 8], ["present", "adj. 现存的, 出席的", 8], ["fake", "adj. 伪造的", 8], ["graduate", "v. 大学毕业", 8], ["billion", "n. 十亿", 8], ["manage", "v. 管理, 完成", 8], ["boost", "v. 提高, 增强", 8], ["despite", "prep. 尽管", 7], ["medical", "adj. 医疗的", 7], ["strategy", "n. 策略", 7], ["figure", "n. 数字, 人物, 身材", 7], ["current", "adj. 当前的, 流行的", 7], ["struggle", "v. 努力, 挣扎", 7], ["purchase", "v. 购买", 7], ["vehicle", "n. ⻋辆, 工具", 7], ["signal", "n. 信号; v. 预示", 7], ["raise", "v. 举起, 提升, 筹款, 抚养", 7], ["switch", "n. 转换, 转变; n. 开关", 7], ["sensitive", "adj. 敏感的, 体贴的", 7], ["avoid", "v. 避免", 7], ["interaction", "n. 互动, 互相影响", 6], ["habitat", "n. 栖息地", 6], ["define", "v. 下定义", 6], ["beyond", "prep. 超出", 6], ["secure", "adj. 安全的", 6], ["similar", "adj. 类似的, 相像的", 6], ["address", "n. 地址, 演讲; v. 演讲, 处理", 6], ["ensure", "v. 确保, 保证", 6], ["assume", "v. 假设, 承担(责任)", 6], ["conduct", "v. 引导, 组织; n. 行为", 6], ["achieve", "v. 达到, 完成", 6], ["demonstrate", "v. 说明, 展示", 6], ["amount", "n. 数量, 数额", 6], ["workforce", "n. 劳动力, 全体员工", 6], ["retire", "v. 退休", 6], ["general", "adj. 普通的, 一般的", 6], ["decline", "n/v. 下降, 减少", 6], ["develop", "v. 发展, 患(病)", 6], ["available", "adj. 可用的, 可获得的", 6], ["institution", "n. 机构, 建立", 5], ["tough", "adj. 艰苦的, 困难的, 坚韧的", 5], ["recommend", "v. 推荐, 介绍", 5], ["factor", "n. 因素", 5], ["replace", "v. 代替, 取代", 5], ["gather", "v. 聚集, 聚合", 5], ["code", "n. 密码; 行为准则", 5], ["video", "n. 录像, 视频", 5], ["screen", "n. 屏幕; v. 筛检, 保护", 5], ["overlook", "v. 俯瞰; 忽视", 5], ["trend", "n. 趋势", 5], ["physical", "adj. 物理的, 身体的", 5], ["double", "adj. 两倍的; v. 加倍", 5], ["legal", "adj. 法律的, 合法的", 5], ["fashion", "n. 时尚, 方式", 5], ["immediate", "adj. 立即的", 5], ["infrastructure", "n. 基础设施", 5], ["announce", "v. 宣布", 5], ["ban", "v. 禁止", 5], ["consume", "v. 消耗, 消费", 5], ["device", "n. 设备; 装置", 5], ["previous", "adj. 先前的, 以往的", 5], ["landscape", "n. ⻛景, 景色", 5], ["acknowledge", "v. 承认, 感谢", 5], ["psychology", "n. 心理学", 5], ["opt", "v. 选择", 5], ["obvious", "adj. 明显的", 5], ["stuff", "n. 物品, 东西; v. 填满", 5], ["engage", "v. 吸引, 参与, 雇佣", 5], ["respond", "v. 回复, 作出反应", 4], ["route", "n. 固定路线", 4], ["solar", "adj. 太阳的; 太阳能的", 4], ["schedule", "n. 日程安排; 时刻表", 4], ["undergraduate", "n. 本科生", 4], ["huge", "adj. 巨大的", 4], ["thrive", "v. 繁荣, 茁壮成⻓", 4], ["delay", "v. 延迟", 4], ["recruit", "v. 招聘, 征召(新兵)", 4], ["sympathy", "n. 同情, 慰问", 4], ["invest", "v. 投资, 投入", 4], ["inspire", "v. 鼓励, 激发", 4], ["restore", "v. 恢复, 修复", 4], ["collective", "adj. 集体的; 共同的", 4], ["concentrate", "v. 集中", 4], ["resource", "n. 资源", 4], ["expose", "v. 暴露", 4], ["tax", "n. 税", 4], ["judge", "v. 判断; n. 法官, 裁判员", 4], ["primary", "adj. 主要的, 最初的", 4], ["impress", "v. 给...留下深刻印象", 4], ["recession", "n. 退后; 经济衰退", 4], ["unemployment", "n. 失业", 4], ["publish", "v. 出版, 发行", 4], ["intuition", "n. 直觉", 4], ["select", "v. 选择, 挑选", 4], ["feed", "v. 喂养", 4], ["artificial", "adj. 人工的, 人造的", 4], ["complain", "v. 抱怨", 4], ["moral", "adj. 道德的", 4], ["embrace", "v. 拥抱, 欣然接受", 4], ["fuel", "n. 燃料; v. 给...加燃料, 加强, 刺激", 4], ["zone", "n. 区域, 地带", 4], ["perceive", "v. 意识到, 感知到", 4], ["constant", "adj. 不变的, 恒定的", 4], ["remove", "v. 移动, 免除", 4], ["block", "n. 阻碍, 障碍; 街区; v. 阻碍", 4], ["claim", "v. 声称; n. 声明, 索赔", 4], ["senior", "adj. 资深的, 级别高的", 4], ["apply", "v. 应用, 申请", 4], ["overwhelm", "v. 压倒; 征服", 4], ["extend", "v. 延伸, 扩大", 3], ["participate", "v. 参与", 3], ["dedicate", "v. 把...献给", 3], ["congress", "n. 代表大会; 国会", 3], ["native", "adj. 本地的; n. 本地人", 3], ["specific", "adj. 具体的, 特定的", 3], ["employ", "v. 雇用, 采用", 3], ["chief", "adj. 主要的, 首要的", 3], ["submit", "v. 顺从, 提交", 3], ["mental", "adj. 精神的", 3], ["reveal", "v. 揭示; 显示", 3], ["inevitable", "adj. 不可避免的", 3], ["setting", "n. 环境", 3], ["deadline", "n. 最后期限", 3], ["contact", "v. 接触, 联系", 3], ["predict", "v. 预测, 预言", 3], ["motivate", "v. 驱使, 激励", 3], ["premium", "adj. 优质的, 高昂的", 3], ["content", "n. 内容; adj. 满意的", 3], ["dismiss", "v. 消除, 解散, 不考虑", 3], ["damage", "n. 伤害; v. 损害", 3], ["suppose", "v. 假定, 假设", 3], ["frequent", "adj. 频繁的", 3], ["element", "n. 元素, 成分", 3], ["intend", "v. 打算, 意指", 3], ["generate", "v. 产生, 引起", 3], ["spring", "n. 春天, 弹簧", 3], ["determine", "v. 决定", 3], ["contrast", "n/v. 对比", 3], ["seek", "v. 寻找", 3], ["solve", "v. 解决, 处理", 3], ["sole", "adj. 唯一的; 独占的", 3], ["silver", "n. 银色; adj. 银色的", 3], ["ahead", "adv. 提前, 领先", 3], ["prospect", "n. 前景", 3], ["rough", "adj. 粗糙的; 大致的", 3], ["stage", "n. 阶段; 舞台", 3], ["launch", "v. 上市, 发行, 发射", 3], ["agent", "n. 代理人, 经纪人", 3], ["calendar", "n. 日历, 历法", 3], ["settle", "v. 解决; 定居", 3], ["adapt", "v. 适应", 3], ["occupy", "v. 占用, 居住", 3], ["provided", "conj. 如果, 假如", 3], ["typical", "adj. 典型的", 3], ["contribute", "v. 捐助, 贡献", 3], ["property", "n. 财产, 特性", 3], ["efficient", "adj. 有效率的", 3], ["vision", "n. 视力, 视觉", 3], ["charge", "v. 充电, 收费; n. 电荷, 指控", 3], ["finish", "v. 完成, 结束", 3], ["prevent", "v. 阻止, 预防", 3], ["afford", "v. 承担得起", 3], ["evolve", "v. 进化; 逐渐发展", 3], ["combat", "v. 防止; 减轻 n. 战斗", 3], ["subtle", "adj. 微妙的, 细微的", 3], ["genuine", "adj. 真正的, 真诚的", 3]], "p1": [["multiple", "adj. 多种多样的", 2], ["rush", "v. 仓促行事, 急着做; n. 匆忙", 2], ["comprehensive", "adj. 全面的", 2], ["ambition", "n. 野心; 雄心", 2], ["alternative", "n. 可选择的事物", 2], ["citizen", "n. 公⺠", 2], ["rational", "adj. 合理的", 2], ["vanish", "v. 消失", 2], ["basis", "n. 基础", 2], ["blame", "v. 责怪, 把...归咎于; n. 责备", 2], ["transform", "v. 改变, 转变", 2], ["suspect", "v. 怀疑; n. 嫌疑人", 2], ["fiction", "n. 小说", 2], ["weigh", "v. 称重, 权衡", 2], ["count", "v. 数数; n. 总数", 2], ["introduce", "v. 介绍, 引进", 2], ["fatal", "adj. 致命的", 2], ["capture", "v. 捕捉", 2], ["eliminate", "v. 淘汰, 消除", 2], ["rare", "adj. 稀有的, 稀少的", 2], ["planet", "n. 星球", 2], ["battery", "n. 电池; 一系列", 2], ["declare", "v. 声明, 宣告", 2], ["conscious", "adj. 有意识的, 意识到的", 2], ["anxious", "adj. 焦虑的, 急切的", 2], ["prompt", "v. 促使; adj. 立即的, 及时的", 2], ["stock", "n. 股票, 库存; v. 储存", 2], ["vast", "adj. 庞大的; 大量的", 2], ["maintain", "v. 维持, 维修, 坚持", 2], ["indifferent", "adj. 漠不关心的", 2], ["underestimate", "v. 低估", 2], ["debt", "n. 债务; 借款", 2], ["expand", "v. 扩大, 扩展", 2], ["enhance", "v. 提高, 增强", 2], ["various", "adj. 各种各样的", 2], ["agriculture", "n. 农业", 2], ["attribute", "v. 把...归因于", 2], ["shade", "n. 阴凉处, 阴影", 2], ["lure", "v. 诱惑; 引诱 n. 诱惑力", 2], ["wise", "adj. 聪明的, 明智的", 2], ["neglect", "v/n. 忽视, 忽略", 2], ["legacy", "n. 遗产", 2], ["empty", "adj. 空的", 2], ["familiar", "adj. 熟悉的", 2], ["imply", "v. 暗示, 表明", 2], ["circumstance", "n. 环境, 条件", 2], ["represent", "v. 展现, 代表", 2], ["feedback", "n. 反馈", 2], ["trait", "n. 特征; 特性", 2], ["household", "adj. 家务的", 2], ["mortgage", "n. 抵押", 2], ["sector", "n. 部⻔; 领域", 2], ["venture", "n. (⻛险)企业; v. 冒险", 2], ["fundamental", "adj. 基础的", 2], ["blow", "v. 吹, 刮", 2], ["curriculum", "n. 课程", 2], ["furthermore", "adv. 此外, 而且", 2], ["attract", "v. 吸引", 2], ["campaign", "n. 运动, 战役", 2], ["attorney", "n. 律师, 代理人", 2], ["chew", "v. 咀嚼", 2], ["outdated", "adj. 过时的", 2], ["stretch", "v. 伸展; 延续 n. 一段时间", 2], ["widespread", "adj. 普遍的, 广泛的", 2], ["considerable", "adj. 相当大的", 2], ["input", "v. 输入(信息), 投入(时间)", 2], ["pledge", "v/n. 保证; 承诺", 2], ["scale", "n. 规模, 程度, 等级", 2], ["straightforward", "adj. 简单的", 2], ["external", "adj. 外部的, 外来的", 2], ["identify", "v. 确认, 识别", 2], ["obtain", "v. 获得", 2], ["vital", "adj. 至关重要的", 2], ["paradox", "n. 矛盾; 悖论", 2], ["commercial", "adj. 商业的", 2], ["secret", "adj. 秘密的, 机密的; n. 秘密", 2], ["initial", "adj. 最初的, 开始的", 2], ["upgrade", "v. 升级; 提升", 2], ["appreciate", "v. 欣赏, 理解, 增值", 2], ["comment", "n/v. 评论", 2], ["elite", "n. 精英", 2], ["striking", "adj. 显著的, 引人注目的", 2], ["satisfy", "v. 使满意", 2], ["strike", "v. 打击", 2], ["propose", "v. 建议, 提出", 2], ["orient", "v. 确定方向, 调整", 2], ["corporation", "n. 公司", 2], ["suffer", "v. 遭受, 忍受", 2], ["allocate", "v. 分配", 2], ["urgent", "adj. 紧急的", 2], ["distinguish", "v. 区分; 辨别", 2], ["drought", "n. 干旱; 旱灾", 2], ["principal", "adj. 主要的; n. 校⻓", 2], ["conjunction", "n. 同时发生", 2], ["unique", "adj. 独一无二的", 2], ["emphasis", "n. 强调, 重视", 2], ["due", "adj. 由于; 预计的; 到期的; 适当的", 2], ["resemble", "v. 像...; 类似", 2], ["ideology", "n. 意识形态, 思想体系", 2], ["intellectual", "adj. 智力的, 才智的", 2], ["deliver", "v. 传送, 发表(讲话)", 2], ["perspective", "n. 观点, 视⻆", 2], ["destroy", "v. 毁灭, 破坏", 2], ["assemble", "v. 集合; 收集", 2], ["render", "v. 使成为; 提供", 2], ["mislead", "v. 误导", 2], ["attitude", "n. 态度", 2], ["alter", "v. 改变", 2], ["handle", "v. 处理, 应付; n. 把手", 2], ["classify", "v. 把...分类", 2], ["apparent", "adj. 明显的", 2], ["detect", "v. 发现, 查明", 2], ["norm", "n. 准则", 2], ["anticipate", "v. 预料, 预⻅", 2], ["implement", "v. 实施, 执行", 2], ["consequence", "n. 结果; 影响", 2], ["rhythm", "n. 节奏", 2], ["item", "n. 物品, 项目", 2], ["accountable", "adj. 负有责任的", 2], ["unleash", "v. 发泄; 释放", 2], ["strive", "v. 努力, 争取", 2], ["justify", "v. 证明合理, 为...辩解", 2], ["title", "n. 标题, 头衔", 2], ["grant", "n. 补助金; v. 准予", 2], ["consent", "n. 同意; v. 同意", 2], ["isolate", "v. 隔离, 孤立", 2], ["organic", "adj. 有机的", 2], ["severe", "adj. 严重的", 2], ["ignore", "v. 忽视, 不予理睬", 2], ["random", "adj. 偶然的; 随机的", 2], ["momentum", "n. 势头, 动量", 2], ["alive", "adj. 活着的", 2], ["contrary", "adj. 相反的; n. 反面", 2], ["waste", "v. 浪费; n. 浪费, 垃圾", 2], ["patient", "adj. 有耐心的; n. 病人", 2], ["spare", "adj. 备用的, 闲置的", 1], ["default", "n. 违约, 默认值", 1], ["tremendous", "adj. 巨大的, 极大的", 1], ["mature", "adj. 成熟的 v. 发育成", 1], ["levy", "n. 征税; v. 征税", 1], ["transition", "n. 过渡, 转变", 1], ["symbol", "n. 象征; 符号", 1], ["reproduce", "v. 复制, 繁殖", 1], ["tactic", "n. 策略; 战术", 1], ["toxic", "adj. 有毒的", 1], ["respective", "adj. 各自的", 1], ["neutral", "adj. 中立的, 中性的", 1], ["discard", "v. 抛弃; 丢弃", 1], ["forecast", "v. 预测", 1], ["suspend", "v. 悬挂; 暂停", 1], ["overhaul", "n/v. 彻底检修", 1], ["defend", "v. 保卫; 防御; 为...辩解", 1], ["shelter", "n. 避难所 v. 保护", 1], ["accustom", "v. 使习惯; 使适应", 1], ["royal", "adj. 皇家", 1], ["devote", "v. 献身; 致力于", 1], ["insight", "n. 洞察力, 深刻⻅解", 1], ["regulate", "v. 管理, 控制", 1], ["intimidate", "v. 恐吓, 威胁", 1], ["accurate", "adj. 精确的, 准确的", 1], ["adjust", "v. 调整", 1], ["harsh", "adj. 残酷的, 严厉的", 1], ["disappear", "v. 消失", 1], ["authorize", "v. 批准; 授权", 1], ["turnover", "n. 营业额; 流动率", 1], ["incredible", "adj. 难以置信的", 1], ["comply", "v. 遵守, 服从", 1], ["blossom", "n. 花朵; 花簇", 1], ["accordance", "n. 一致; 符合", 1], ["satellite", "n. 卫星; 人造卫星", 1], ["capable", "adj. 有能力的; 能干的", 1], ["document", "v. 记录 n. 文件", 1], ["prejudice", "n. 偏⻅; 歧视", 1], ["automate", "v. 使自动化", 1], ["adopt", "v. 收养, 领养", 1], ["refrain", "v. 抑制; 克制", 1], ["forum", "n. 论坛", 1], ["emerge", "v. 出现, 显现", 1], ["boundary", "n. 边界, 界限", 1], ["sharp", "adj. 锋利的; 鲜明的", 1], ["flourish", "v. 繁荣; 茁壮成⻓", 1], ["swing", "n/v. 摇动; 改变", 1], ["image", "n. 形象", 1], ["discern", "v. 辨别; 识别", 1], ["therapy", "n. 治疗; 疗法", 1], ["rob", "v. 抢劫", 1], ["tempt", "v. 引诱, 诱惑", 1], ["admit", "v. 承认", 1], ["adequate", "adj. 足够的, 合格的", 1], ["incentive", "n. 激励, 动力", 1], ["symptom", "n. 症状; 征兆", 1], ["tackle", "v. 处理, 解决", 1], ["impetus", "n. 动力; 推动", 1], ["recycle", "v. 循环利用", 1], ["grasp", "v/n. 抓紧; 理解", 1], ["outcome", "n. 结果", 1], ["magnet", "n. 磁铁", 1], ["intake", "n. 摄入量", 1], ["awful", "adj. 糟糕的; 可怕的", 1], ["pose", "v. 造成, 引起; n. 姿势", 1], ["acquire", "v. 获得, 得到", 1], ["distract", "v. 使分心", 1], ["delete", "v. 删除", 1], ["interfere", "v. 干预, 妨碍", 1], ["soar", "v. 高⻜; 激增", 1], ["principle", "n. 原则, 原理", 1], ["privilege", "n. 特权, 优惠", 1], ["survive", "v. 幸存, 生存", 1], ["analyze", "v. 分析", 1], ["rural", "adj. 乡村的", 1], ["necessity", "n. 必要, 必需品", 1], ["grave", "adj. 严重的 n. 墓穴", 1], ["cognitive", "adj. 认知的", 1], ["pioneer", "n. 先驱; 拓荒者", 1], ["interpret", "v. 解释; 口译", 1], ["accomplish", "v. 完成, 实现", 1], ["exaggerate", "v. 夸大, 夸张", 1], ["astronaut", "n. 宇航员", 1], ["belt", "n. 腰带, 皮带", 1], ["enormous", "adj. 巨大的", 1], ["precise", "adj. 精确的; 明确的", 1], ["yield", "n. 产量; v. 出产; 屈服", 1], ["reputation", "n. 名声, 声誉", 1], ["disturb", "v. 干扰; 打扰", 1], ["inherent", "adj. 固有的; 内在的", 1], ["appease", "v. 平息; 安抚", 1], ["astonish", "v. 使吃惊", 1], ["certify", "v. 证实, 证明", 1], ["forthcoming", "adj. 即将来临的", 1], ["pure", "adj. 纯粹的, 干净的", 1], ["depress", "v. 使沮丧; 使不景气", 1], ["status", "n. 地位, 状况", 1], ["decent", "adj. 得体的, 像样的", 1], ["fluctuate", "v. 波动", 1], ["accelerate", "v. 加速; 加快", 1], ["label", "n. 标签; v. 贴标签于", 1], ["rent", "n. 租金; v. 租借", 1], ["underline", "v. 画底线标出, 强调", 1], ["campus", "n. (大学)校园", 1], ["sacrifice", "n. 牺牲", 1], ["enroll", "v. 登记, 注册", 1], ["eager", "adj. 急切的; 渴望的", 1], ["highway", "n. 公路", 1], ["alleviate", "v. 减轻, 缓解", 1], ["conservative", "adj. 保守的", 1], ["tentative", "adj. 不确定的; 踌躇的", 1], ["endanger", "v. 危及, 危害", 1], ["dispute", "v/n. 争论, 纷争", 1], ["disorder", "n. 骚乱; 杂乱", 1], ["remarkable", "adj. 非凡的; 显著的", 1], ["assert", "v. 坚称", 1], ["highlight", "v. 强调, 突出", 1], ["cooperate", "v. 合作", 1], ["breathe", "v. 呼吸", 1], ["crucial", "adj. 关键性的, 至关重要的", 1], ["grand", "adj. 巨大的; 重大的", 1], ["afraid", "adj. 害怕的, 担心的", 1], ["integrate", "v. 使成为一体", 1], ["horizon", "n. 地平线; 眼界", 1], ["correlate", "v. 相互关联", 1], ["regarding", "prep. 关于", 1], ["quarter", "n. 四分之一, 一刻钟, 季度", 1], ["successive", "adj. 连续的, 接连的", 1], ["squeeze", "v. 挤压", 1], ["chronic", "adj. ⻓期的, 慢性的", 1], ["branch", "n. 树枝, 分支", 1], ["storm", "n. ⻛暴, 暴⻛雨", 1], ["trail", "n. 痕迹, 踪迹; v. 跟踪", 1], ["diary", "n. 日记", 1], ["recall", "v. 回忆起, 记起", 1], ["scheme", "n. 计划 v. 密谋", 1], ["occupation", "n. 职业, 工作", 1], ["chaos", "n. 混乱, 杂乱", 1], ["bolster", "v. 增强; 加强", 1], ["boxing", "n. 拳击", 1], ["inhabit", "v. 居住于, 栖息于", 1], ["adhere", "v. 附着; 遵守", 1], ["seize", "v. 抓住; 夺取", 1], ["vacation", "n. 假期", 1], ["hinder", "v. 妨碍, 牵制", 1], ["glimpse", "v. 瞥⻅; n. 一瞥", 1], ["aftermath", "n. 后果; 创伤", 1], ["luxury", "n. 奢华, 奢侈", 1], ["transparent", "adj. 透明的", 1], ["pursue", "v. 追求, 追逐", 1], ["machine", "n. 机器", 1], ["recreation", "n. 娱乐", 1], ["hazard", "n. 危险; ⻛险", 1], ["negotiate", "v. 协商, 谈判", 1], ["domestic", "adj. 本国的, 家用的", 1], ["gray", "adj. 灰色的; n. 灰色", 1], ["reverse", "v. 使反转, 撤销", 1], ["stare", "v. 凝视, 盯", 1], ["insist", "v. 坚持, 坚决要求", 1], ["silent", "adj. 沉默的, 安静的", 1], ["comprehend", "v. 理解", 1], ["headline", "n. 标题; 大字标题", 1], ["immense", "adj. 极大的", 1], ["favour", "n. 偏爱, 帮助", 1], ["substitute", "n. 代替物; v. 代替", 1], ["infant", "adj. 初期的; n. 婴儿, 幼儿", 1], ["equal", "adj. 平等的, 同样的", 1], ["delicate", "adj. 精致的; 易碎的", 1], ["sacred", "adj. 神圣的", 1], ["wipe", "v. 擦拭, 抹掉", 1], ["enthusiasm", "n. 热情", 1], ["worthy", "adj. 有价值的; 值得...的", 1], ["appropriate", "adj. 合适的; 恰当的", 1], ["retreat", "v. 撤退; 后退 n. 隐居处", 1], ["journalism", "n. 新闻工作", 1], ["workout", "n. 锻炼", 1], ["devise", "v. 发明; 设想", 1], ["exhaust", "v. 耗尽, 使筋疲力尽", 1], ["philosophy", "n. 哲学", 1], ["revenue", "n. 收益, 收入", 1], ["painstaking", "adj. 费力的", 1], ["access", "n. 机会, 通道; v. 进入, 获取", 1], ["consistent", "adj. 一致的, 持续的", 1], ["underlie", "v. 构成...的基础", 1], ["allege", "v. 断言; 声称", 1], ["immigrant", "n. 移⺠, 移居", 1], ["segment", "n. 部分; v. 划分", 1], ["cope", "v. 处理; 应付", 1], ["magnify", "v. 放大, 夸大", 1], ["leisure", "n. 空闲, 闲暇", 1], ["arise", "v. 出现, 发生", 1], ["align", "v. 使...一致", 1], ["coalition", "n. 联合政府", 1], ["bargain", "v. 讨价还价; n. 交易, 便宜货", 1], ["score", "n. 得分, 比分", 1], ["curb", "v. 控制, 抑制", 1], ["impulse", "n. 冲动; 刺激", 1], ["grain", "n. 谷物; 粮⻝", 1], ["deliberate", "adj. 故意的; v. 深思熟虑", 1], ["fortune", "n. 运气, 财富", 1], ["penalty", "n. 处罚; 惩罚", 1], ["prime", "adj. 主要的, 首要的", 1], ["feasible", "adj. 可行的", 1], ["folk", "adj. ⺠间的; v. 人们", 1], ["barrier", "n. 障碍, 屏障", 1], ["volume", "n. 体积; (书的)卷; 音量", 1], ["exquisite", "adj. 精美的", 1], ["recognize", "v. 认出; 识别", 1], ["platform", "n. 平台", 1], ["dose", "n. 一次(药)剂量", 1], ["tablet", "n. 药片", 1], ["wonder", "v. 想知道; n. 惊讶, 奇迹", 1], ["intense", "adj. 强烈的, 热切的", 1], ["temporary", "adj. 临时的; 暂时的", 1], ["bulk", "n. 大部分; 体积, 大量", 1], ["guard", "v. 守卫", 1], ["indigenous", "adj. 土生土⻓的", 1], ["lazy", "adj. 懒惰的", 1], ["circuit", "n. 电路; 环行; 巡回", 1], ["compliment", "v/n. 赞扬; 称赞", 1], ["click", "v. 点击; 使发出咔嗒声; n. 单击", 1], ["modest", "adj. 谦虚的; 些许的", 1], ["preserve", "v. 维护, 保护", 1], ["evaporate", "v. 使蒸发, 消失", 1], ["credit", "n. 信用, 学分", 1], ["routine", "adj. 常规的, 例行的; n. 常规", 1], ["island", "n. 岛屿", 1], ["dictate", "v. 口述, 支配, 命令", 1], ["sequence", "n. 序列", 1], ["livestock", "n. 牲口; 牧畜", 1], ["capital", "n. 首都, 资本; 大写字母", 1], ["hate", "v. 讨厌", 1], ["faculty", "n. 能力; 全体教师", 1], ["dynamic", "adj. 充满活力的, 动态的", 1], ["debate", "v./n. 辩论, 讨论", 1], ["conceive", "v. 想象; 构想; 怀孕", 1], ["counterpart", "n. 相对应的人或事", 1], ["retain", "v. 保留, 保持", 1], ["appeal", "v. 呼吁, 有吸引力; n. 申诉", 1], ["mission", "n. 任务; 使命", 1], ["abuse", "v/n. 滥用, 虐待", 1], ["deteriorate", "v. 恶化, 变化", 1], ["mandate", "n/v. 授权", 1], ["contradict", "v. 反驳; 相反", 1], ["architect", "n. 建筑师", 1], ["prominent", "adj. 著名的; 显著的", 1], ["asset", "n. 资产", 1], ["constitute", "v. 构成, 组成", 1], ["indulge", "v. 沉迷; 纵容", 1], ["install", "v. 安装; 使就职", 1], ["remedy", "n. 解决方法, 疗法", 1], ["intensive", "adj. 密集的, 集中的", 1], ["vulnerable", "adj. 脆弱的, 易受伤的", 1], ["encounter", "v. 遭遇, 碰到", 1], ["economical", "adj. 节约的", 1], ["dropout", "n. 辍学者", 1], ["clarity", "n. 清晰", 1], ["enforce", "v. 强制执行, 强迫", 1], ["odd", "adj. 奇怪的; 单数的", 1], ["stable", "adj. 稳定的, 稳重的", 1], ["contrive", "v. 设法做到", 1], ["cultivate", "v. 培养; 耕种", 1], ["interrupt", "v. 打断", 1], ["release", "v. 释放, 发泄; n. 发布", 1], ["diet", "n./ v. 节⻝", 1], ["proper", "adj. 合适的, 恰当的", 1], ["manipulate", "v. 操纵; 操作", 1], ["lucrative", "adj. 获利多的", 1], ["sink", "v. 下沉", 1], ["indispensable", "adj. 必不可少的", 1], ["broad", "adj. 宽阔的, 广泛的", 1], ["vivid", "adj. 生动的, 清晰的", 1], ["staple", "n. 主要产品; adj. 主要的", 1], ["abrupt", "adj. 突然的; 唐突的", 1], ["behalf", "n. 代表; 利益", 1], ["match", "n. 比赛; v. 相匹配", 1], ["steady", "adj. 稳定的, 持续的", 1], ["cooperative", "adj. 合作的 n. 合作社", 1], ["insulate", "v. 使隔音, 使绝缘; 隔离", 1], ["intricate", "adj. 错综复杂的", 1], ["divide", "v. 分开, 分散", 1], ["celebrate", "v. 庆祝", 1], ["misunderstand", "v. 误解", 1], ["observe", "v. 注意到, 观察, 遵守", 1], ["pilot", "n. ⻜行员; adj. 试点的", 1], ["ultimate", "adj. 最后的, 至高的", 1], ["condemn", "v. 谴责", 1], ["doubt", "v. 怀疑, 不确定", 1], ["lean", "v. 倚靠; adj. 瘦的", 1], ["milestone", "n. 里程碑; 重要阶段", 1], ["impair", "v. 损害; 削弱", 1], ["phenomenon", "n. 现象", 1], ["proceed", "v. 继续; 前进", 1]]}, ROI = [{"n": "比例问题", "cn": 12, "cost": 1, "roi": 12.0, "ch": 10, "p": 236, "id": "10-1", "day": 1}, {"n": "圆和扇形基本公式", "cn": 9, "cost": 1, "roi": 9.0, "ch": 6, "p": 141, "id": "6-9", "day": 1}, {"n": "直线与圆的位置关系", "cn": 9, "cost": 1, "roi": 9.0, "ch": 7, "p": 161, "id": "7-6", "day": 1}, {"n": "古典概型", "cn": 16, "cost": 2, "roi": 8.0, "ch": 9, "p": 209, "id": "9-10", "day": 1}, {"n": "工程问题", "cn": 8, "cost": 1, "roi": 8.0, "ch": 10, "p": 251, "id": "10-8", "day": 1}, {"n": "整式核心公式", "cn": 7, "cost": 1, "roi": 7.0, "ch": 2, "p": 29, "id": "2-1", "day": 2}, {"n": "均值不等式", "cn": 7, "cost": 1, "roi": 7.0, "ch": 4, "p": 88, "id": "4-7", "day": 2}, {"n": "等差数列定义与基本公式", "cn": 6, "cost": 1, "roi": 6.0, "ch": 5, "p": 103, "id": "5-3", "day": 2}, {"n": "基本原理与基本符号", "cn": 10, "cost": 2, "roi": 5.0, "ch": 9, "p": 196, "id": "9-1", "day": 2}, {"n": "集合问题", "cn": 5, "cost": 1, "roi": 5.0, "ch": 10, "p": 254, "id": "10-9", "day": 2}, {"n": "路程问题", "cn": 12, "cost": 3, "roi": 4.0, "ch": 10, "p": 245, "id": "10-7", "day": 3}, {"n": "一元二次函数", "cn": 8, "cost": 2, "roi": 4.0, "ch": 3, "p": 57, "id": "3-6", "day": 3}, {"n": "整除与余数", "cn": 4, "cost": 1, "roi": 4.0, "ch": 1, "p": 5, "id": "1-2", "day": 3}, {"n": "约数与倍数", "cn": 4, "cost": 1, "roi": 4.0, "ch": 1, "p": 8, "id": "1-3", "day": 3}, {"n": "球的基本公式", "cn": 4, "cost": 1, "roi": 4.0, "ch": 8, "p": 183, "id": "8-5", "day": 3}, {"n": "平均值、方差、标准差、极差", "cn": 7, "cost": 2, "roi": 3.5, "ch": 9, "p": 220, "id": "9-13", "day": 4}, {"n": "三角形的全等与相似", "cn": 6, "cost": 2, "roi": 3.0, "ch": 6, "p": 127, "id": "6-4", "day": 4}, {"n": "独立事件", "cn": 6, "cost": 2, "roi": 3.0, "ch": 9, "p": 216, "id": "9-12", "day": 4}, {"n": "有理数与无理数", "cn": 3, "cost": 1, "roi": 3.0, "ch": 1, "p": 2, "id": "1-1", "day": 4}, {"n": "变化率问题", "cn": 3, "cost": 1, "roi": 3.0, "ch": 10, "p": 238, "id": "10-2", "day": 4}, {"n": "最值问题", "cn": 8, "cost": 3, "roi": 2.67, "ch": 7, "p": 167, "id": "7-10", "day": 5}, {"n": "不定方程问题", "cn": 8, "cost": 3, "roi": 2.67, "ch": 10, "p": 255, "id": "10-10", "day": 5}, {"n": "一次方程(组)与不等式(组)", "cn": 5, "cost": 2, "roi": 2.5, "ch": 4, "p": 74, "id": "4-1", "day": 5}, {"n": "二次方程与不等式", "cn": 5, "cost": 2, "roi": 2.5, "ch": 4, "p": 76, "id": "4-2", "day": 5}, {"n": "三角形的面积公式", "cn": 5, "cost": 2, "roi": 2.5, "ch": 6, "p": 123, "id": "6-2", "day": 5}, {"n": "绝对值方程与不等式", "cn": 6, "cost": 3, "roi": 2.0, "ch": 4, "p": 86, "id": "4-6", "day": 6}, {"n": "三角形的边角关系", "cn": 4, "cost": 2, "roi": 2.0, "ch": 6, "p": 120, "id": "6-1", "day": 6}, {"n": "分式转化运算", "cn": 2, "cost": 1, "roi": 2.0, "ch": 2, "p": 40, "id": "2-5", "day": 6}, {"n": "分式裂项运算", "cn": 2, "cost": 1, "roi": 2.0, "ch": 2, "p": 42, "id": "2-6", "day": 6}, {"n": "棱柱", "cn": 2, "cost": 1, "roi": 2.0, "ch": 8, "p": 175, "id": "8-1", "day": 6}, {"n": "平均值问题", "cn": 2, "cost": 1, "roi": 2.0, "ch": 10, "p": 242, "id": "10-5", "day": 7}, {"n": "溶液问题", "cn": 2, "cost": 1, "roi": 2.0, "ch": 10, "p": 244, "id": "10-6", "day": 7}, {"n": "等差数列的性质", "cn": 3, "cost": 2, "roi": 1.5, "ch": 5, "p": 105, "id": "5-4", "day": 7}, {"n": "列举找规律", "cn": 3, "cost": 2, "roi": 1.5, "ch": 5, "p": 112, "id": "5-9", "day": 7}, {"n": "分组分配问题", "cn": 3, "cost": 2, "roi": 1.5, "ch": 9, "p": 202, "id": "9-5", "day": 7}, {"n": "集合之间的运算", "cn": 2, "cost": 2, "roi": 1.0, "ch": 3, "p": 53, "id": "3-3", "day": 8}, {"n": "等比数列定义与基本公式", "cn": 2, "cost": 2, "roi": 1.0, "ch": 5, "p": 106, "id": "5-5", "day": 8}, {"n": "等比数列的性质", "cn": 2, "cost": 2, "roi": 1.0, "ch": 5, "p": 108, "id": "5-6", "day": 8}, {"n": "平行四边形", "cn": 2, "cost": 2, "roi": 1.0, "ch": 6, "p": 134, "id": "6-6", "day": 8}, {"n": "定序问题", "cn": 2, "cost": 2, "roi": 1.0, "ch": 9, "p": 204, "id": "9-7", "day": 8}, {"n": "穷举法", "cn": 2, "cost": 2, "roi": 1.0, "ch": 9, "p": 205, "id": "9-8", "day": 9}, {"n": "几何概型", "cn": 2, "cost": 2, "roi": 1.0, "ch": 9, "p": 215, "id": "9-11", "day": 9}, {"n": "图表问题", "cn": 2, "cost": 2, "roi": 1.0, "ch": 9, "p": 223, "id": "9-14", "day": 9}, {"n": "绝对值的定义", "cn": 1, "cost": 1, "roi": 1.0, "ch": 1, "p": 17, "id": "1-8", "day": 9}, {"n": "绝对值的性质", "cn": 1, "cost": 1, "roi": 1.0, "ch": 1, "p": 18, "id": "1-9", "day": 9}, {"n": "数列的基本公式", "cn": 1, "cost": 1, "roi": 1.0, "ch": 5, "p": 102, "id": "5-2", "day": 10}, {"n": "圆", "cn": 1, "cost": 1, "roi": 1.0, "ch": 7, "p": 156, "id": "7-3", "day": 10}, {"n": "点与直线、点与圆", "cn": 1, "cost": 1, "roi": 1.0, "ch": 7, "p": 158, "id": "7-4", "day": 10}, {"n": "圆柱", "cn": 1, "cost": 1, "roi": 1.0, "ch": 8, "p": 177, "id": "8-2", "day": 10}, {"n": "利润问题", "cn": 1, "cost": 1, "roi": 1.0, "ch": 10, "p": 239, "id": "10-3", "day": 10}, {"n": "植树问题", "cn": 1, "cost": 1, "roi": 1.0, "ch": 10, "p": 241, "id": "10-4", "day": 11}, {"n": "恒成立不等式", "cn": 2, "cost": 3, "roi": 0.67, "ch": 4, "p": 90, "id": "4-8", "day": 11}, {"n": "直线与抛物线的位置关系", "cn": 2, "cost": 3, "roi": 0.67, "ch": 7, "p": 162, "id": "7-7", "day": 11}, {"n": "内切球和外接球", "cn": 2, "cost": 3, "roi": 0.67, "ch": 8, "p": 185, "id": "8-6", "day": 11}, {"n": "因式分解", "cn": 1, "cost": 2, "roi": 0.5, "ch": 2, "p": 36, "id": "2-4", "day": 11}, {"n": "集合之间的关系", "cn": 1, "cost": 2, "roi": 0.5, "ch": 3, "p": 52, "id": "3-2", "day": 12}, {"n": "函数的定义及性质", "cn": 1, "cost": 2, "roi": 0.5, "ch": 3, "p": 54, "id": "3-4", "day": 12}, {"n": "指数函数与对数函数", "cn": 1, "cost": 2, "roi": 0.5, "ch": 3, "p": 61, "id": "3-8", "day": 12}, {"n": "对勾函数与双撇函数", "cn": 1, "cost": 2, "roi": 0.5, "ch": 3, "p": 63, "id": "3-9", "day": 12}, {"n": "max 函数与 min 函数", "cn": 1, "cost": 2, "roi": 0.5, "ch": 3, "p": 65, "id": "3-10", "day": 12}, {"n": "构造等差与构造等比", "cn": 1, "cost": 2, "roi": 0.5, "ch": 5, "p": 111, "id": "5-8", "day": 13}, {"n": "正多边形", "cn": 1, "cost": 2, "roi": 0.5, "ch": 6, "p": 139, "id": "6-8", "day": 13}, {"n": "对称关系", "cn": 1, "cost": 2, "roi": 0.5, "ch": 7, "p": 164, "id": "7-9", "day": 13}, {"n": "相邻与不相邻问题", "cn": 1, "cost": 2, "roi": 0.5, "ch": 9, "p": 199, "id": "9-2", "day": 13}, {"n": "相同元素分配问题", "cn": 1, "cost": 2, "roi": 0.5, "ch": 9, "p": 201, "id": "9-4", "day": 13}, {"n": "质数、合数", "cn": 1, "cost": 3, "roi": 0.33, "ch": 1, "p": 12, "id": "1-5", "day": 14}, {"n": "比例运算与定理", "cn": 1, "cost": 3, "roi": 0.33, "ch": 1, "p": 16, "id": "1-7", "day": 14}, {"n": "绝对值和差模型", "cn": 1, "cost": 3, "roi": 0.33, "ch": 1, "p": 20, "id": "1-10", "day": 14}, {"n": "分式方程与不等式", "cn": 1, "cost": 3, "roi": 0.33, "ch": 4, "p": 83, "id": "4-4", "day": 14}, {"n": "三角不等式", "cn": 1, "cost": 3, "roi": 0.33, "ch": 4, "p": 92, "id": "4-9", "day": 14}, {"n": "棱锥", "cn": 1, "cost": 3, "roi": 0.33, "ch": 8, "p": 179, "id": "8-3", "day": 15}];
+  var KEY="mpacc2027.sprint";
+  var S = {write:{}, word:{}, wrong:[]};
+  try{ var raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw)); }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+  function $(id){ return document.getElementById(id); }
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]}); }
+
+  /* ---------------- 写作 ---------------- */
+  var wCur={sub:0,set:0};
+  function wRender(){
+    var tabs=$("wtTabs"); if(!tabs) return;
+    tabs.innerHTML = W.map(function(g,i){
+      return '<button class="wt-tab'+(i===wCur.sub?' on':'')+'" data-i="'+i+'">'+g.name+'</button>';
+    }).join("");
+    tabs.querySelectorAll(".wt-tab").forEach(function(b){
+      b.onclick=function(){ wCur.sub=+b.dataset.i; wCur.set=0; wRender(); };
+    });
+    var g=W[wCur.sub];
+    $("wtSets").innerHTML = '<span class="note" style="margin-right:6px">'+g.meta+'</span>' +
+      g.sets.map(function(x,i){ return '<button class="wt-set'+(i===wCur.set?' on':'')+'" data-i="'+i+'">'+x.name+'</button>'; }).join("");
+    $("wtSets").querySelectorAll(".wt-set").forEach(function(b){
+      b.onclick=function(){ wCur.set=+b.dataset.i; wRender(); };
+    });
+    var set=g.sets[wCur.set];
+    var html="";
+    set.segs.forEach(function(seg,i){
+      var k=g.id+"|"+wCur.set+"|"+i;
+      var best=S.write[k]||0;
+      html+='<div class="wseg" data-k="'+k+'">'
+        +'<div class="wseg-h"><b>'+(i+1)+'. '+esc(seg[0])+'</b>'
+        +(best?'<span class="wbadge">最好 '+best+'%</span>':'')
+        +'<button class="btn ghost sm wHide">遮住</button>'
+        +'<button class="btn sm wWrite">写一遍</button></div>'
+        +'<div class="wseg-s" data-txt="'+esc(seg[1])+'">'+esc(seg[1]).replace(/\n/g,'<br>')+'</div>'
+        +'<div class="wseg-x" style="display:none"></div></div>';
+    });
+    $("wtBody").innerHTML=html;
+    $("wtBody").querySelectorAll(".wseg").forEach(function(el){
+      var k=el.dataset.k, txt=el.querySelector(".wseg-s").dataset.txt;
+      el.querySelector(".wHide").onclick=function(){
+        var box=el.querySelector(".wseg-s");
+        var hid=box.style.visibility==="hidden";
+        box.style.visibility=hid?"visible":"hidden";
+        this.textContent=hid?"遮住":"显示";
+      };
+      el.querySelector(".wWrite").onclick=function(){
+        var x=el.querySelector(".wseg-x");
+        if(x.dataset.open==="1"){ x.style.display="none"; x.dataset.open="0"; return; }
+        x.style.display="block"; x.dataset.open="1";
+        x.innerHTML='<textarea class="wta" rows="5" placeholder="凭记忆把这一段写出来，写完点提交"></textarea>'
+          +'<div class="row" style="margin-top:6px"><button class="btn sm wSub">提交对比</button></div>'
+          +'<div class="wres"></div>';
+        x.querySelector(".wSub").onclick=function(){
+          var got=x.querySelector(".wta").value||"";
+          var r=cmp(txt,got);
+          var pct=r.pct;
+          if(pct>(S.write[k]||0)) S.write[k]=pct;
+          save();
+          x.querySelector(".wres").innerHTML='<div class="wscore">命中 '+pct+'%　'+
+            (pct>=85?"可以过了":pct>=60?"再写一遍":"差得还多，先读 3 遍")+'</div>'
+            +'<div class="wmiss">'+r.rows.map(function(o){
+              return '<div class="wm'+(o.hit?" hit":"")+'">'+(o.hit?"✓ ":"✗ ")+esc(o.s)+'</div>';
+            }).join("")+'</div>';
+          var bd=el.querySelector(".wbadge");
+          if(!bd){ bd=document.createElement("span"); bd.className="wbadge";
+            var h=el.querySelector(".wseg-h"); h.insertBefore(bd, h.children[1]||null); }
+          bd.textContent="最好 "+(S.write[k]||0)+"%";
+        };
+      };
+    });
+  }
+  // 句子级对比
+  function splitSent(t){ return String(t).replace(/\n/g,"。").split(/[。；;！!？?]/).map(function(x){return x.trim();}).filter(Boolean); }
+  function cmp(ref, got){
+    var R=splitSent(ref), G=splitSent(got), rows=[], hitN=0;
+    R.forEach(function(sent){
+      var best=0;
+      G.forEach(function(g2){
+        var common=0, used={};
+        for(var i=0;i<sent.length;i++){ var ch=sent[i]; if(/[，。、；：""''（）,.;:]/.test(ch)) continue;
+          for(var j=0;j<g2.length;j++){ if(g2[j]===ch && !used[j]){ used[j]=1; common++; break; } } }
+        best=Math.max(best, common/Math.max(1,sent.replace(/[，。、；：""''（）,.;:]/g,"").length));
+      });
+      var hit=best>=0.6; if(hit) hitN++;
+      rows.push({s:sent, hit:hit});
+    });
+    return {pct: R.length?Math.round(hitN/R.length*100):0, rows:rows};
+  }
+
+  /* ---------------- 25 天词表 ---------------- */
+  var START=new Date(2026,10,24); // 11/24
+  function dayIdx(){ var t=new Date(); t.setHours(0,0,0,0); var a=new Date(START); a.setHours(0,0,0,0); return Math.floor((t-a)/86400000); }
+  function plan(){
+    var raw=dayIdx(), prev=raw<0, d=prev?0:raw;
+    if(d<=11){ var s0=d*18; return {d:d, prev:prev, tier:"P0 真题高频（≥3 次）", words:WD.p0.slice(s0,s0+18)}; }
+    if(d<=21){ var s1=(d-12)*43; return {d:d, prev:prev, tier:"P1 真题中频（1–2 次）", words:WD.p1.slice(s1,s1+43)}; }
+    return {d:d, prev:prev, tier:"P0 回炉 + 错词", words:WD.p0.slice(0,30)};
+  }
+  function p25Render(){
+    var head=$("plan25Head"), body=$("plan25Body"); if(!head) return;
+    var p=plan(), done=(S.word[String(p.d)]||[]);
+    var pct=p.words.length?Math.round(done.length/p.words.length*100):0;
+    head.innerHTML=(p.prev?'明天（11/24）开始 · 第 1 天':'今天：第 '+(p.d+1)+' 天')+' · '+p.tier+
+      ' · '+p.words.length+' 个（P0 '+WD.p0.length+' / P1 '+WD.p1.length+'）'+
+      '<div class="pbar2"><i style="width:'+pct+'%"></i></div>';
+    if(!p.words.length){ body.innerHTML='<div class="empty">11/24 开始，每天 18 个高频词。</div>'; return; }
+    var html='<div class="wrow">';
+    p.words.forEach(function(w,i){
+      var ok=done.indexOf(w[0])>=0;
+      html+='<span class="wchip'+(ok?" ok":"")+'" data-w="'+esc(w[0])+'"><b>'+esc(w[0])+'</b>'+esc(w[1])+'</span>';
+    });
+    html+='</div><div class="row" style="margin-top:8px"><button class="btn sm" id="p25Flash">开始背（'+(p.words.length-done.length)+' 个）</button>'
+      +'<button class="btn ghost sm" id="p25All">全部标为已背</button></div><div id="p25FlashArea" style="margin-top:10px"></div>';
+    body.innerHTML=html;
+    body.querySelectorAll(".wchip").forEach(function(c){
+      c.onclick=function(){
+        var d=String(p.d), arr=S.word[d]||[], w=c.dataset.w;
+        var i=arr.indexOf(w); if(i>=0) arr.splice(i,1); else arr.push(w);
+        S.word[d]=arr; save(); p25Render();
+      };
+    });
+    $("p25All").onclick=function(){ S.word[String(p.d)]=p.words.map(function(w){return w[0];}); save(); p25Render(); };
+    $("p25Flash").onclick=function(){ flash(p.words.filter(function(w){ return done.indexOf(w[0])<0; }), p.d); };
+  }
+  function flash(list, d){
+    var area=$("p25FlashArea"); if(!area) return;
+    if(!list.length){ area.innerHTML='<div class="empty">今天这 18 个都背过了。</div>'; return; }
+    var i=0, known=0;
+    function draw(){
+      var w=list[i];
+      if(!w){ area.innerHTML='<div class="done"><div class="big">'+known+'/'+list.length+'</div><div class="note">今天这一组过完，不认识的已记下。</div></div>'; p25Render(); return; }
+      area.innerHTML='<div class="wf"><div class="wf-w">'+esc(w[0])+'</div>'
+        +'<div class="wf-m" style="visibility:hidden">'+esc(w[1])+'<span class="wf-c">真题 '+w[2]+' 次</span></div>'
+        +'<div class="row"><button class="btn ghost sm" id="wfShow">看意思</button>'
+        +'<button class="btn sm" id="wfKnow">认识</button>'
+        +'<button class="btn ghost sm" id="wfNo">不认识</button></div>'
+        +'<div class="note" style="text-align:center;margin-top:6px">'+(i+1)+' / '+list.length+'</div></div>';
+      $("wfShow").onclick=function(){ area.querySelector(".wf-m").style.visibility="visible"; };
+      $("wfKnow").onclick=function(){
+        known++; var arr=S.word[String(d)]||[]; if(arr.indexOf(w[0])<0){arr.push(w[0]); S.word[String(d)]=arr;} save(); i++; draw();
+      };
+      $("wfNo").onclick=function(){
+        var arr=S.word[String(d)]||[]; if(arr.indexOf(w[0])>=0){arr.splice(arr.indexOf(w[0]),1); S.word[String(d)]=arr;}
+        S.wrong=S.wrong.filter(function(x){return x!==w[0];}); S.wrong.push(w[0]); save(); i++; draw();
+      };
+    }
+    draw();
+  }
+
+  /* ---------------- 数学性价比 ---------------- */
+  function roiRender(){
+    var head=$("roiHead"), body=$("roiBody"); if(!head) return;
+    var cover=0, n=0;
+    ROI.forEach(function(r){ if(r.day<=10){ cover+=r.cn; n++; } });
+    head.innerHTML='前 10 天吃掉的 '+n+' 个考点 = 十年 '+cover+' 次（≈ 每年 '+(Math.round(cover*3/10))+
+      ' 分）；下面按性价比排，第 1 列是建议第几天学。';
+    var html='<table class="roi"><thead><tr><th>天</th><th>考点</th><th>次数</th><th>成本</th><th>性价比</th></tr></thead><tbody>';
+    ROI.slice(0,30).forEach(function(r){
+      html+='<tr><td>D'+r.day+'</td><td>'+esc(r.n)+'<div class="fs">'+esc(r.ch)+' · 01 P'+r.p+'</div></td>'
+        +'<td>'+r.cn+'</td><td>'+r.cost+'</td><td><b>'+r.roi+'</b></td></tr>';
+    });
+    body.innerHTML=html+'</tbody></table>';
+  }
+
+  wRender(); p25Render(); roiRender();
 })();
 </script>
 </body>
